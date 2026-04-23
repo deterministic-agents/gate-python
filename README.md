@@ -2,9 +2,9 @@
 
 Reference implementation of the GATE control plane contracts in Python.
 
-**Governed Agent Trust Environment (GATE) **  
-https://deterministicagents.ai · https://codeberg.org/Deterministic_Agents/GATE  
-License: CC BY 4.0 — Andrew Stevens
+**Governed Agent Trust Environment (GATE)**  
+https://deterministicagents.ai · https://github.com/deterministic-agents/gate-python
+License: CC BY 4.0 - Andrew Stevens
 
 ---
 
