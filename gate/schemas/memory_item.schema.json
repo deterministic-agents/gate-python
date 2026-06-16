@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deterministicagents.ai/gate/v1/contracts/memory_item.schema.json",
+  "title": "GATE Memory Item",
+  "description": "Stored item in a governed memory store. v1.3 introduces required quality metadata (content_class, provenance_uri, provenance_hash, confidence_score, created_at) consumed by the C18 Data Quality Gate at retrieval time.",
+  "version": "1.1.0",
+  "type": "object",
+
+  "required": [
+    "schema_version", "item_id",
+    "tenant_id",
+    "content_class",
+    "provenance_uri", "provenance_hash",
+    "confidence_score",
+    "created_at"
+  ],
+
+  "properties": {
+    "schema_version": { "type": "string", "const": "v1" },
+
+    "item_id": { "type": "string", "description": "Stable identifier for this item within its memory store." },
+    "tenant_id": { "type": "string" },
+
+    "content_class": {
+      "type": "string",
+      "description": "Required taxonomy key (e.g. legal_text, product_pricing, internal_policy, public_reference). Drives the per-class quality bundle configuration. Memory Gateway rejects writes that omit content_class."
+    },
+
+    "provenance_uri": {
+      "type": "string",
+      "description": "Resolvable external reference to the source. HTTP(S) URI, signed source identifier, or registered upstream pipeline identity. Self-referential URIs fail validation."
+    },
+    "provenance_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Hash of the source descriptor resolved from provenance_uri at write time. Verified by C18 at retrieval time."
+    },
+
+    "confidence_score": {
+      "type": "number", "minimum": 0, "maximum": 1,
+      "description": "Confidence captured at write time. Semantics defined by the upstream pipeline. C18 enforces the per-class minimum; it does not compute the score."
+    },
+
+    "created_at": { "type": "string", "format": "date-time" },
+
+    "body":         { "description": "Item payload (free-form, store-specific)." },
+    "metadata":     { "type": "object", "description": "Store-specific metadata not covered by the standard fields above." },
+    "embedding_ref": { "type": "string", "description": "Pointer to the embedding vector(s) for this item, if applicable." }
+  }
+}

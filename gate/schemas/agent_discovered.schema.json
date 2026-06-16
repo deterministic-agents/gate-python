@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deterministicagents.ai/gate/v1/contracts/agent_discovered.schema.json",
+  "title": "GATE Agent Discovered Event (C17)",
+  "description": "Emitted by the C17 Discovery plane when an agent-like workload is detected that is not present in the C04 inventory. Routes to the C04 Lifecycle service for enrol / terminate / exception remediation.",
+  "version": "1.1.0",
+  "type": "object",
+
+  "required": [
+    "schema_version", "event_type", "time",
+    "tenant_id", "environment", "candidate"
+  ],
+
+  "properties": {
+    "schema_version": { "type": "string", "const": "v1" },
+    "event_type":     { "type": "string", "const": "gate.discovery.agent_discovered" },
+    "time":           { "type": "string", "format": "date-time" },
+
+    "trace_id":  { "type": "string" },
+    "tenant_id": { "type": "string" },
+    "environment": { "type": "string", "enum": ["dev", "test", "prod"] },
+    "control_plane_version": { "type": "string" },
+
+    "candidate": {
+      "type": "object",
+      "required": [
+        "workload_identity", "detection_boundary",
+        "classification_confidence", "candidate_hash",
+        "classifier_bundle_hash"
+      ],
+      "properties": {
+        "workload_identity": {
+          "type": "string",
+          "description": "Workload identity observed making the discovered call (SPIFFE ID, cloud IAM principal, or service-account ARN)."
+        },
+        "detection_boundary": {
+          "type": "string",
+          "enum": ["network", "asset_inventory", "identity_classifier", "tool_gateway_ingress"],
+          "description": "Which C17 mechanism raised this candidate."
+        },
+        "classification_confidence": {
+          "type": "number", "minimum": 0, "maximum": 1,
+          "description": "Confidence that the candidate is agentic (LLM-driven) rather than a deterministic service."
+        },
+        "evidence_payload": {
+          "type": "object",
+          "description": "Detector-specific signals: observed call patterns, asset signals, identity-mismatch records. Schema is detector-defined; must include detector_id and detector_version."
+        },
+        "candidate_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "description": "Stable hash over workload_identity + detection_boundary + canonicalised evidence_payload. Used to deduplicate and to correlate with the C17 remediation outcome."
+        },
+        "classifier_bundle_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "description": "Signed classifier rule-set bundle hash. Required so the discovery decision is replayable (C10)."
+        }
+      }
+    }
+  }
+}

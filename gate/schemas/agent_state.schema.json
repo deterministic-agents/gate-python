@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deterministicagents.ai/gate/v1/contracts/agent_state.schema.json",
+  "title": "GATE Agent Lifecycle State (C04)",
+  "description": "C04 lifecycle state of an agent in the inventory. v1.3 adds the 'Discovered' entry state to receive candidates from the C17 discovery plane. Agents must traverse Discovered (or be Commissioned via a declared path) before reaching Run.",
+  "version": "1.1.0",
+  "type": "object",
+
+  "required": [
+    "schema_version", "agent_instance_id",
+    "tenant_id", "environment",
+    "state", "owner_identity",
+    "updated_at"
+  ],
+
+  "properties": {
+    "schema_version": { "type": "string", "const": "v1" },
+
+    "agent_instance_id": { "type": "string", "description": "Workload identity (SPIFFE ID or equivalent)." },
+    "agent_name":        { "type": "string" },
+    "agent_version":     { "type": "string" },
+    "tenant_id":         { "type": "string" },
+    "environment":       { "type": "string", "enum": ["dev", "test", "prod"] },
+
+    "state": {
+      "type": "string",
+      "enum": ["Discovered", "Commissioned", "Run", "Quiesce", "Decommissioned", "Terminated"],
+      "description": "Lifecycle state. Discovered is the v1.3 entry state for C17 candidates pending classification or remediation. Terminated is the v1.3 outcome for candidates that failed remediation."
+    },
+
+    "discovered_from": {
+      "type": "string",
+      "enum": ["network", "asset_inventory", "identity_classifier", "tool_gateway_ingress"],
+      "description": "Detection boundary that raised the discovery event. Required when state is 'Discovered'."
+    },
+    "candidate_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Foreign key to the originating gate.discovery.agent_discovered event. Required when state is 'Discovered'."
+    },
+
+    "owner_identity":     { "type": ["string", "null"], "description": "Team or individual accountable. Null only when state is 'Discovered' or 'Terminated'." },
+    "abom_hash":          { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$", "description": "Required when state is 'Commissioned' or 'Run'." },
+    "current_baseline_hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$", "description": "Active C19 baseline. Required at bounded or high-privilege tier when state is 'Run'." },
+
+    "updated_at":         { "type": "string", "format": "date-time" },
+    "commissioned_at":    { "type": "string", "format": "date-time" },
+    "decommissioned_at":  { "type": "string", "format": "date-time" }
+  },
+
+  "allOf": [
+    {
+      "if": { "properties": { "state": { "const": "Discovered" } } },
+      "then": { "required": ["discovered_from", "candidate_hash"] }
+    },
+    {
+      "if": { "properties": { "state": { "enum": ["Commissioned", "Run"] } } },
+      "then": { "required": ["abom_hash", "owner_identity"] }
+    }
+  ]
+}

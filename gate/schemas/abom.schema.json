@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deterministicagents.ai/gate/v1/contracts/abom.schema.json",
+  "title": "GATE Agent Bill of Materials (ABOM)",
+  "description": "Authoritative manifest for an agent version: model, prompt bundle, tool schema set, invariant bundle, policy bundle. v1.3 adds current_baseline_hash so the C19 baseline is tied to the ABOM version.",
+  "version": "1.1.0",
+  "type": "object",
+
+  "required": [
+    "schema_version", "abom_id", "abom_hash",
+    "agent_name", "agent_version",
+    "model", "prompt_bundle_hash",
+    "tool_schema_hash",
+    "policy_bundle_hash",
+    "invariant_bundle_hash",
+    "created_at", "owner_identity"
+  ],
+
+  "properties": {
+    "schema_version": { "type": "string", "const": "v1" },
+
+    "abom_id":   { "type": "string", "format": "uuid" },
+    "abom_hash": {
+      "type": "string", "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Stable hash over the canonicalised ABOM contents. Recorded in policy decisions, replay traces, and C19 baselines."
+    },
+
+    "agent_name":    { "type": "string" },
+    "agent_version": { "type": "string" },
+
+    "model": {
+      "type": "object",
+      "required": ["provider", "name", "version"],
+      "properties": {
+        "provider":  { "type": "string" },
+        "name":      { "type": "string" },
+        "version":   { "type": "string" },
+        "config":    { "type": "object", "description": "Temperature, top_p, max_tokens, seed, etc. Pinned for replay." }
+      }
+    },
+
+    "prompt_bundle_hash":    { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "tool_schema_hash":      { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "policy_bundle_hash":    { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "invariant_bundle_hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+
+    "current_baseline_hash": {
+      "type": "string", "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Hash of the active C19 behavioural baseline for this ABOM. Required at bounded and high-privilege tiers per Check18. Updates trigger the C19 re-baselining workflow."
+    },
+
+    "memory_quality_bundle_hash": {
+      "type": "string", "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Hash of the active C18 quality bundle in force for this agent. Recorded in every quality_decision event."
+    },
+
+    "created_at":     { "type": "string", "format": "date-time" },
+    "owner_identity": { "type": "string" },
+    "signature":      { "type": "string", "description": "Detached signature over abom_hash." }
+  }
+}

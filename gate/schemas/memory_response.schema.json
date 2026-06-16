@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deterministicagents.ai/gate/v1/contracts/memory_response.schema.json",
+  "title": "GATE Memory Response Envelope",
+  "description": "Memory Gateway response envelope. v1.3 adds quality_flags and quality_decision_id so downstream consumers (agent runtime, prompt template, C13 trace) can honour the C18 quality decision.",
+  "version": "1.1.0",
+  "type": "object",
+
+  "required": [
+    "schema_version", "request_id", "request_hash",
+    "tenant_id", "environment", "status"
+  ],
+
+  "properties": {
+    "schema_version": { "type": "string", "const": "v1" },
+
+    "request_id":   { "type": "string", "format": "uuid", "description": "Echoed from the originating MemoryRequest." },
+    "request_hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+
+    "tenant_id":   { "type": "string" },
+    "environment": { "type": "string", "enum": ["dev", "test", "prod"] },
+    "control_plane_version": { "type": "string" },
+
+    "status": {
+      "type": "string",
+      "enum": ["ok", "denied", "downgraded", "error"],
+      "description": "Aggregate status. 'denied' reflects a hard deny from any boundary (ACL, poisoning, C18 quality gate). 'downgraded' reflects a partial response per the C18 action matrix."
+    },
+
+    "items": {
+      "type": "array",
+      "items": { "type": "object", "description": "memory_item shape, with optional quality_flags attached per item." }
+    },
+
+    "quality_flags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["stale", "low_confidence", "provenance_missing", "provenance_unverified"]
+      },
+      "uniqueItems": true,
+      "description": "Aggregate flags across the returned items. Downstream consumers MUST honour these."
+    },
+    "quality_decision_id": {
+      "type": "string", "format": "uuid",
+      "description": "Foreign key to the originating gate.memory.quality_decision event. Required for retrievals at bounded or high-privilege tier."
+    },
+
+    "error": {
+      "type": "object",
+      "description": "Present when status is 'error'.",
+      "properties": {
+        "code":    { "type": "string" },
+        "message": { "type": "string" }
+      }
+    }
+  }
+}

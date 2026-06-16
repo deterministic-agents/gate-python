@@ -380,6 +380,13 @@ class LedgerChain:
         retention_class: str,
         initial_prev_hash: str = GENESIS,
     ) -> None:
+        # Validate retention_class up-front so a misconfigured chain fails
+        # fast at construction time rather than at first append.
+        if retention_class not in RETENTION_CLASSES:
+            raise ValueError(
+                f"retention_class must be one of {RETENTION_CLASSES}; "
+                f"got: {retention_class!r}"
+            )
         self.tenant_id = tenant_id
         self.environment = environment
         self.sink_uri = sink_uri

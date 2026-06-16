@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deterministicagents.ai/gate/v1/contracts/memory_request.schema.json",
+  "title": "GATE Memory Request Envelope",
+  "description": "Memory Gateway request envelope (read or write). v1.3 adds an optional quality_override that, when present, admits a retrieval through C18 by exception with a TTL and an approver.",
+  "version": "1.1.0",
+  "type": "object",
+
+  "required": [
+    "schema_version", "request_id", "request_type",
+    "agent_instance_id", "tenant_id", "environment",
+    "request_hash"
+  ],
+
+  "properties": {
+    "schema_version": { "type": "string", "const": "v1" },
+
+    "request_id":   { "type": "string", "format": "uuid" },
+    "request_type": { "type": "string", "enum": ["read", "write"] },
+
+    "agent_instance_id": { "type": "string" },
+    "tenant_id":         { "type": "string" },
+    "environment":       { "type": "string", "enum": ["dev", "test", "prod"] },
+    "control_plane_version": { "type": "string" },
+
+    "request_hash": {
+      "type": "string", "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Hash of the canonicalised request payload. Used by C18 quality_decision and by ledger event correlation."
+    },
+
+    "query": {
+      "type": "object",
+      "description": "Read parameters (free-form, store-specific). Required when request_type is 'read'."
+    },
+    "item": {
+      "type": "object",
+      "description": "Item to write (memory_item.schema.json shape). Required when request_type is 'write'."
+    },
+
+    "quality_override": {
+      "type": "object",
+      "description": "Break-glass override for the C18 quality gate. When present, an otherwise-denied retrieval is admitted with the override metadata recorded in the quality_decision event.",
+      "required": ["override_id", "approver_id", "expires_at", "justification"],
+      "properties": {
+        "override_id":   { "type": "string", "format": "uuid" },
+        "approver_id":   { "type": "string" },
+        "expires_at":    { "type": "string", "format": "date-time" },
+        "justification": { "type": "string", "minLength": 10 }
+      }
+    }
+  }
+}

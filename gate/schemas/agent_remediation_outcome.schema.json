@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deterministicagents.ai/gate/v1/contracts/agent_remediation_outcome.schema.json",
+  "title": "GATE Agent Remediation Outcome Event (C17)",
+  "description": "Emitted by the C04 Lifecycle service after handling a C17 discovery candidate. Records whether the candidate was enrolled into C04 Commission, terminated through the IdP / Tool Gateway / network path, or accepted as an exception with a TTL.",
+  "version": "1.1.0",
+  "type": "object",
+
+  "required": [
+    "schema_version", "event_type", "time",
+    "tenant_id", "environment",
+    "candidate_hash", "outcome",
+    "owner_identity", "time_to_remediation_seconds"
+  ],
+
+  "if": {
+    "properties": { "outcome": { "const": "exception" } }
+  },
+  "then": {
+    "required": ["exception_id", "exception_ttl_expires_at"]
+  },
+
+  "properties": {
+    "schema_version": { "type": "string", "const": "v1" },
+    "event_type":     { "type": "string", "const": "gate.discovery.agent_remediation_outcome" },
+    "time":           { "type": "string", "format": "date-time" },
+
+    "trace_id":  { "type": "string" },
+    "tenant_id": { "type": "string" },
+    "environment": { "type": "string", "enum": ["dev", "test", "prod"] },
+    "control_plane_version": { "type": "string" },
+
+    "candidate_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Foreign key to the originating gate.discovery.agent_discovered event."
+    },
+    "outcome": {
+      "type": "string",
+      "enum": ["enrolled", "terminated", "exception"],
+      "description": "Result of the remediation. 'enrolled' routes into C04 Commission. 'terminated' executes the IdP revocation + Tool Gateway deny + network egress block path. 'exception' admits the candidate under a documented justification with a TTL."
+    },
+    "owner_identity": {
+      "type": ["string", "null"],
+      "description": "Resolved owner (team, individual, fallback owner). May be null when no owner could be resolved AND the outcome is terminated for that reason."
+    },
+    "time_to_remediation_seconds": {
+      "type": "integer", "minimum": 0,
+      "description": "Wall-clock seconds from agent_discovered emission to this remediation outcome."
+    },
+
+    "c04_commission_id": {
+      "type": "string", "format": "uuid",
+      "description": "Present when outcome is 'enrolled'. Foreign key to the C04 Commission record created."
+    },
+
+    "exception_id": {
+      "type": "string", "format": "uuid",
+      "description": "Required when outcome is 'exception'."
+    },
+    "exception_ttl_expires_at": {
+      "type": "string", "format": "date-time",
+      "description": "Required when outcome is 'exception'. Exception expires at this time and the candidate re-triggers discovery."
+    },
+
+    "revocation_proof": {
+      "type": "object",
+      "description": "Present when outcome is 'terminated'. Pointers to the revocation evidence at each layer.",
+      "properties": {
+        "idp_revocation_id":          { "type": "string" },
+        "gateway_deny_rule_version":  { "type": "string" },
+        "network_policy_version":     { "type": "string" }
+      }
+    },
+
+    "ledger_event_id": { "type": "string", "format": "uuid" }
+  }
+}
