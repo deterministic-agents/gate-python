@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deterministicagents.ai/gate/v1/contracts/drift_decision.schema.json",
+  "title": "GATE Drift Decision Event (C19)",
+  "description": "Emitted by the C19 Drift Detector on each evaluation interval. Records the per-dimension statistical comparison of a rolling production window against the signed baseline. Distinct from gate.assurance.adversarial_outcome (C16).",
+  "version": "1.1.0",
+  "type": "object",
+
+  "required": [
+    "schema_version", "event_type", "time",
+    "baseline_hash", "abom_hash",
+    "evaluation_window",
+    "dimension",
+    "statistical_test", "test_statistic", "p_value", "threshold",
+    "decision",
+    "contributing_run_count",
+    "trace_id_sample",
+    "ledger_event_id",
+    "tenant_id", "environment"
+  ],
+
+  "properties": {
+    "schema_version": { "type": "string", "const": "v1" },
+    "event_type":     { "type": "string", "const": "gate.assurance.drift_decision" },
+    "time":           { "type": "string", "format": "date-time" },
+
+    "tenant_id":   { "type": "string" },
+    "environment": { "type": "string", "enum": ["dev", "test", "prod"] },
+    "control_plane_version": { "type": "string" },
+
+    "baseline_hash": {
+      "type": "string", "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Hash of the signed baseline this comparison was made against."
+    },
+    "abom_hash": {
+      "type": "string", "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "ABOM in force during the evaluation window."
+    },
+
+    "evaluation_window": {
+      "type": "object",
+      "required": ["start", "end"],
+      "properties": {
+        "start": { "type": "string", "format": "date-time" },
+        "end":   { "type": "string", "format": "date-time" }
+      }
+    },
+
+    "dimension": {
+      "type": "string",
+      "description": "Behavioural dimension being evaluated (tool_choice, output_length, output_confidence, refusal_rate, retry_rate, reasoning_depth_proxy, or a per-tool argument distribution key)."
+    },
+    "statistical_test": {
+      "type": "string",
+      "enum": ["ks", "chi2"],
+      "description": "ks (Kolmogorov-Smirnov) for continuous dimensions. chi2 (chi-square) for categorical dimensions."
+    },
+    "test_statistic": { "type": "number" },
+    "p_value":        { "type": "number", "minimum": 0, "maximum": 1 },
+    "threshold":      { "type": "number", "description": "Configured p-value threshold for this dimension. Drift is detected when p_value < threshold sustained over the configured window count." },
+
+    "decision": {
+      "type": "string",
+      "enum": ["no_drift", "drift_detected", "insufficient_data", "new_dimension_observed"],
+      "description": "Resolved drift decision. 'insufficient_data' fires when the window does not have the minimum sample size. 'new_dimension_observed' fires when the current window contains a behaviour outside the baseline support."
+    },
+
+    "contributing_run_count": { "type": "integer", "minimum": 0 },
+    "trace_id_sample": {
+      "type": "array",
+      "items": { "type": "string" },
+      "maxItems": 50,
+      "description": "Sampled trace IDs from runs contributing to this window. Bounded to avoid unbounded growth; sampling is unbiased."
+    },
+
+    "ledger_event_id": { "type": "string", "format": "uuid" }
+  }
+}

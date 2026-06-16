@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deterministicagents.ai/gate/v1/contracts/quality_decision.schema.json",
+  "title": "GATE Memory Quality Decision Event (C18)",
+  "description": "Emitted by the C18 Data Quality Gate (Memory Gateway) for every retrieval. Captures the per-item decision against the signed quality bundle: freshness, confidence, and provenance gates.",
+  "version": "1.1.0",
+  "type": "object",
+
+  "required": [
+    "schema_version", "event_type", "time",
+    "request_hash", "item_id",
+    "content_class",
+    "freshness_age_seconds",
+    "confidence_score",
+    "provenance_uri",
+    "provenance_hash_verified",
+    "quality_bundle_hash",
+    "outcome",
+    "flags_set",
+    "trace_id", "ledger_event_id",
+    "tenant_id", "environment"
+  ],
+
+  "properties": {
+    "schema_version": { "type": "string", "const": "v1" },
+    "event_type":     { "type": "string", "const": "gate.memory.quality_decision" },
+    "time":           { "type": "string", "format": "date-time" },
+
+    "tenant_id": { "type": "string" },
+    "environment": { "type": "string", "enum": ["dev", "test", "prod"] },
+    "control_plane_version": { "type": "string" },
+
+    "request_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Hash of the originating MemoryRequest. Correlates the quality decision to the retrieval."
+    },
+    "item_id": {
+      "type": "string",
+      "description": "Stored item identifier (vector store ID, document ID, or equivalent)."
+    },
+    "content_class": {
+      "type": "string",
+      "description": "Content class taxonomy key. Drives the per-class TTL, minimum confidence, and provenance-required configuration in the quality bundle."
+    },
+
+    "freshness_age_seconds": {
+      "type": "number", "minimum": 0,
+      "description": "Item age in seconds at retrieval time."
+    },
+    "confidence_score": {
+      "type": "number", "minimum": 0, "maximum": 1,
+      "description": "Confidence score recorded at write time. Semantics defined by the upstream pipeline. C18 enforces the per-class threshold; it does not compute the score."
+    },
+    "provenance_uri": {
+      "type": "string",
+      "description": "Resolvable external reference to the item's source. Self-referential URIs are not accepted."
+    },
+    "provenance_hash_verified": {
+      "type": "boolean",
+      "description": "True when the stored provenance_hash matches the hash of the source descriptor resolved from provenance_uri."
+    },
+
+    "quality_bundle_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Hash of the signed quality bundle in force when this decision was made. Recorded so the decision is replayable."
+    },
+    "outcome": {
+      "type": "string",
+      "enum": ["pass", "flag", "downgrade", "deny"],
+      "description": "Resolved quality-gate outcome. Severity order: deny > downgrade > flag > pass."
+    },
+    "flags_set": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["stale", "low_confidence", "provenance_missing", "provenance_unverified"]
+      },
+      "uniqueItems": true,
+      "description": "Quality flags returned alongside the item. Downstream consumers (agent runtime, prompt template, C13 trace) MUST honour these."
+    },
+
+    "trace_id":        { "type": "string" },
+    "ledger_event_id": { "type": "string", "format": "uuid" },
+
+    "quality_override": {
+      "type": "object",
+      "description": "Present only when a break-glass override admitted an otherwise-denied retrieval. See memory_request.quality_override.",
+      "properties": {
+        "override_id":   { "type": "string", "format": "uuid" },
+        "approver_id":   { "type": "string" },
+        "expires_at":    { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}

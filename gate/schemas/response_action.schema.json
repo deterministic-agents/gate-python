@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deterministicagents.ai/gate/v1/contracts/response_action.schema.json",
+  "title": "GATE Response Action Event (C19)",
+  "description": "Emitted by the C19 Response Router after consuming a drift_decision. Records the configured response applied (log, flag, raise ticket, reduce autonomy tier, emergency stop) and the metadata needed to audit it.",
+  "version": "1.1.0",
+  "type": "object",
+
+  "required": [
+    "schema_version", "event_type", "time",
+    "drift_decision_id",
+    "action", "action_metadata",
+    "trace_id", "ledger_event_id",
+    "tenant_id", "environment"
+  ],
+
+  "properties": {
+    "schema_version": { "type": "string", "const": "v1" },
+    "event_type":     { "type": "string", "const": "gate.assurance.response_action" },
+    "time":           { "type": "string", "format": "date-time" },
+
+    "tenant_id":   { "type": "string" },
+    "environment": { "type": "string", "enum": ["dev", "test", "prod"] },
+    "control_plane_version": { "type": "string" },
+
+    "drift_decision_id": {
+      "type": "string", "format": "uuid",
+      "description": "Foreign key to the originating drift_decision (resolved by ledger_event_id)."
+    },
+
+    "action": {
+      "type": "string",
+      "enum": ["log_only", "flag", "review_ticket", "tier_reduction", "emergency_stop"],
+      "description": "Severity-ordered response. log_only is the baseline at bounded tier; emergency_stop is reserved for high-privilege tier and a documented dimension list."
+    },
+
+    "action_metadata": {
+      "type": "object",
+      "description": "Action-specific payload. Examples below.",
+      "examples": [
+        { "review_ticket_id": "GATE-1234", "assignee": "platform-eng" },
+        { "from_tier": "high_privilege", "to_tier": "bounded", "duration_seconds": 86400 },
+        { "kill_switch_id": "c06-emergency-stop-2026-06-16T13:00Z" }
+      ]
+    },
+
+    "trace_id":        { "type": "string" },
+    "ledger_event_id": { "type": "string", "format": "uuid" }
+  }
+}

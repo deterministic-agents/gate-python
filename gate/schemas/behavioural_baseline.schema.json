@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deterministicagents.ai/gate/v1/contracts/behavioural_baseline.schema.json",
+  "title": "GATE Behavioural Baseline Artifact (C19)",
+  "description": "Signed baseline tied to a specific ABOM version. Records per-dimension distributions of agent behaviour observed during a controlled corpus window. Consumed by the C19 Drift Detector. Not an event - a stored, signed artifact.",
+  "version": "1.1.0",
+  "type": "object",
+
+  "required": [
+    "baseline_hash", "baseline_id",
+    "abom_hash", "gate_version",
+    "corpus_descriptor",
+    "per_dimension_distributions",
+    "signing_key_id", "algorithm", "signature",
+    "created_at"
+  ],
+
+  "properties": {
+    "baseline_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Stable hash over the canonicalised baseline contents excluding this field and the signature. Recorded in every gate.assurance.drift_decision event."
+    },
+    "baseline_id": {
+      "type": "string", "format": "uuid",
+      "description": "UUID for this baseline. Used as a stable reference across re-baselining events."
+    },
+    "abom_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Hash of the ABOM (model version + prompt bundle + tool schema + invariant bundle) the baseline is tied to. Invalidated when the ABOM changes."
+    },
+    "gate_version": { "type": "string", "description": "GATE framework version under which this baseline was captured." },
+
+    "corpus_descriptor": {
+      "type": "object",
+      "required": ["type"],
+      "oneOf": [
+        {
+          "properties": {
+            "type": { "const": "time_window" },
+            "start_time": { "type": "string", "format": "date-time" },
+            "end_time":   { "type": "string", "format": "date-time" }
+          },
+          "required": ["type", "start_time", "end_time"]
+        },
+        {
+          "properties": {
+            "type": { "const": "eval_set" },
+            "eval_set_id":      { "type": "string" },
+            "eval_set_version": { "type": "string" }
+          },
+          "required": ["type", "eval_set_id"]
+        }
+      ],
+      "description": "Source of the corpus. Either a documented production time window or a versioned eval set."
+    },
+
+    "per_dimension_distributions": {
+      "type": "object",
+      "description": "Keys are behavioural dimension names (e.g. tool_choice, output_length, refusal_rate, output_confidence). Values are distribution descriptors.",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["distribution_type"],
+        "properties": {
+          "distribution_type": {
+            "type": "string",
+            "enum": ["categorical", "continuous"],
+            "description": "Drives which statistical test (chi-square vs Kolmogorov-Smirnov) C19 uses against this dimension."
+          },
+          "support":              { "type": ["array", "object"], "description": "Categories (for categorical) or empirical range (for continuous)." },
+          "distribution_parameters": { "type": "object", "description": "Test-specific summary statistics (counts per category, percentiles, empirical CDF samples)." },
+          "sample_size":          { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+
+    "signing_key_id": { "type": "string", "description": "Identifier of the key that signed this baseline." },
+    "algorithm":      { "type": "string", "default": "ES256" },
+    "signature":      { "type": "string", "description": "Base64 signature over baseline_hash + canonicalised metadata." },
+
+    "created_at":     { "type": "string", "format": "date-time" },
+    "approver_identity": {
+      "type": "string",
+      "description": "Identity that approved the baseline (Baseline Owner in the C19 re-baselining runbook). Required for non-initial baselines."
+    },
+    "previous_baseline_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Present on re-baselining. Links to the prior baseline that this artifact supersedes."
+    }
+  }
+}

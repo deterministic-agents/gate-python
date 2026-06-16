@@ -1,0 +1,71 @@
+# gate-python embedded schema bundle - v1.1.0
+#
+# Schemas bundled with gate-python so the validation module can run
+# without depending on the gate-contracts repo at runtime. Hashes below
+# are pinned at release time; if the bundled schemas drift from
+# gate-contracts the validator will silently disagree with peers.
+
+gate_contracts_version: "1.1.0"
+gate_contracts_source: "https://github.com/deterministic-agents/gate-contracts/releases/tag/v1.1.0"
+
+# v1.0.0 schemas (carried forward unchanged from gate-python v1.0.0).
+# Re-pin from gate-contracts v1.1.0 at release time.
+schemas:
+  - filename: tool_envelope.schema.json
+    sha256:   PENDING_AT_RELEASE
+  - filename: policy_decision_record.schema.json
+    sha256:   PENDING_AT_RELEASE
+  - filename: audit_ledger_event.schema.json
+    sha256:   PENDING_AT_RELEASE
+  - filename: replay_trace.schema.json
+    sha256:   PENDING_AT_RELEASE
+  - filename: hitl_decision_record.schema.json
+    sha256:   PENDING_AT_RELEASE
+  - filename: multi_agent_envelope.schema.json
+    sha256:   PENDING_AT_RELEASE
+
+  # v1.3 / v1.1.0 additions
+  - filename: agent_discovered.schema.json
+    sha256:   sha256:925e42014ebd4f7ee91a8e5d51c00497d85e039f2cb4b2dd78349f38b00cb25b
+    introduced_in: "1.1.0"
+    used_by_control: C17
+  - filename: agent_remediation_outcome.schema.json
+    sha256:   sha256:a5c2c004929e798a077f50a20b879dc42477c88cdbe7d86d7114a21582af0e09
+    introduced_in: "1.1.0"
+    used_by_control: C17
+  - filename: quality_decision.schema.json
+    sha256:   sha256:7acd7a0da8b15657b32233446c7c6893a70d9c171761097cfeded1835cd5e6ba
+    introduced_in: "1.1.0"
+    used_by_control: C18
+  - filename: behavioural_baseline.schema.json
+    sha256:   sha256:2b3cb5567bc049869d91630292e595b92f0fcae9fe974eb6ed438e06aea80489
+    introduced_in: "1.1.0"
+    used_by_control: C19
+  - filename: drift_decision.schema.json
+    sha256:   sha256:29203d98b3e7bd3b0b46fc308d8dc8f62c37efc742272b1a2d814b77b6aa3b86
+    introduced_in: "1.1.0"
+    used_by_control: C19
+  - filename: response_action.schema.json
+    sha256:   sha256:abbc1d11b5bca1cacd6a76dd0d9c8e8b6a44b44e6eda881f33c36de21f01b1d8
+    introduced_in: "1.1.0"
+    used_by_control: C19
+  - filename: agent_state.schema.json
+    sha256:   sha256:214f25ee4a57cfd8c5e917b605b6d0f05e4604b875a5fc30b9af9dd67245e98c
+    introduced_in: "1.1.0"
+    used_by_control: C04
+  - filename: memory_item.schema.json
+    sha256:   sha256:ff1080e15efe68ca4bd8880a3c5e1097f70a15c6aedf43efc6cddee07f59a04b
+    introduced_in: "1.1.0"
+    used_by_control: C18
+  - filename: memory_request.schema.json
+    sha256:   sha256:730829b8a526c68cdade0da39bcf2ddd3d6b8564e20634129c69afa969348fe1
+    introduced_in: "1.1.0"
+    used_by_control: C18
+  - filename: memory_response.schema.json
+    sha256:   sha256:06fcad3d076f8a1f5dec7924477e7159f3ed9cec4e7ba0713c598a560716682c
+    introduced_in: "1.1.0"
+    used_by_control: C18
+  - filename: abom.schema.json
+    sha256:   sha256:3573e8bffcfd790fd707b004984155a9b2cf88c3d7ca948fa105d0f15b6ad513
+    introduced_in: "1.1.0"
+    used_by_control: C04

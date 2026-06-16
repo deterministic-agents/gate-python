@@ -22,12 +22,16 @@ framework dependency. Pick what you need.
 | `gate.replay` | `ReplayTrace` construction and step recording                                               |
 | `gate.signing` | ES256 action signing and signature verification                                             |
 | `gate.validation` | JSON Schema validation for all GATE contract types                                          |
+| `gate.discovery`           | C17 agent discovery event builders + classifier coverage helper                             |
+| `gate.memory.quality`      | C18 quality gate evaluation + event builder (pure functions)                                |
+| `gate.assurance.behaviour` | C19 drift detection event builders + optional scipy KS / chi-square helper                  |
 
 ## Requirements
 
 ```
 cryptography >= 42.0.0
 jsonschema   >= 4.21.0   (optional - only needed for gate.validation)
+scipy        >= 1.11.0   (optional - only needed for gate.assurance.behaviour.compute_drift_score)
 pyyaml       >= 6.0.1    (optional - only needed for examples)
 pytest       >= 8.0.0    (for running the test suite)
 ```
@@ -156,3 +160,17 @@ gate-python/
 │   └── test_gate.py             # full test suite (70+ tests)
 └── requirements.txt
 ```
+
+---
+
+## v1.1.0 (2026-06-16)
+
+Compatible with GATE v1.3. Adds three new modules:
+
+- `gate.discovery` - constructors for the C17 agent.discovered and agent.remediation_outcome events.
+- `gate.memory.quality` - C18 quality gate evaluation (freshness, confidence, provenance) and event constructor. All evaluation functions are pure.
+- `gate.assurance.behaviour` - C19 drift_decision and response_action event constructors, baseline currency check, and an optional scipy-backed KS / chi-square drift score.
+
+`gate/schemas/` now bundles the gate-contracts v1.1.0 schemas with a signed MANIFEST.yaml. `gate.validation.GATEValidator` gains six new `validate_*` methods for the new event types.
+
+Also fixes a pre-existing bug in `gate.ledger.LedgerChain`: invalid `retention_class` now raises `ValueError` at construction time instead of at first append.

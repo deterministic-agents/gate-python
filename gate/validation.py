@@ -72,6 +72,14 @@ SCHEMA_REPLAY_TRACE = "replay_trace.schema.json"
 SCHEMA_HITL_DECISION = "hitl_decision_record.schema.json"
 SCHEMA_AGENT_MESSAGE = "multi_agent_envelope.schema.json"
 
+# v1.3 additions
+SCHEMA_AGENT_DISCOVERED = "agent_discovered.schema.json"
+SCHEMA_AGENT_REMEDIATION_OUTCOME = "agent_remediation_outcome.schema.json"
+SCHEMA_QUALITY_DECISION = "quality_decision.schema.json"
+SCHEMA_BEHAVIOURAL_BASELINE = "behavioural_baseline.schema.json"
+SCHEMA_DRIFT_DECISION = "drift_decision.schema.json"
+SCHEMA_RESPONSE_ACTION = "response_action.schema.json"
+
 
 # ---------------------------------------------------------------------------
 # Validator
@@ -161,6 +169,32 @@ class GATEValidator:
     def validate_agent_message(self, envelope: dict[str, Any]) -> "ValidationResult":
         """Validate an AgentMessageEnvelope."""
         return self._validate(envelope, SCHEMA_AGENT_MESSAGE)
+
+    # ----- v1.3 validators -----
+
+    def validate_agent_discovered(self, event: dict[str, Any]) -> "ValidationResult":
+        """Validate a gate.discovery.agent_discovered event (C17)."""
+        return self._validate(event, SCHEMA_AGENT_DISCOVERED)
+
+    def validate_agent_remediation_outcome(self, event: dict[str, Any]) -> "ValidationResult":
+        """Validate a gate.discovery.agent_remediation_outcome event (C17)."""
+        return self._validate(event, SCHEMA_AGENT_REMEDIATION_OUTCOME)
+
+    def validate_quality_decision(self, event: dict[str, Any]) -> "ValidationResult":
+        """Validate a gate.memory.quality_decision event (C18)."""
+        return self._validate(event, SCHEMA_QUALITY_DECISION)
+
+    def validate_behavioural_baseline(self, artifact: dict[str, Any]) -> "ValidationResult":
+        """Validate a signed behavioural baseline artifact (C19)."""
+        return self._validate(artifact, SCHEMA_BEHAVIOURAL_BASELINE)
+
+    def validate_drift_decision(self, event: dict[str, Any]) -> "ValidationResult":
+        """Validate a gate.assurance.drift_decision event (C19)."""
+        return self._validate(event, SCHEMA_DRIFT_DECISION)
+
+    def validate_response_action(self, event: dict[str, Any]) -> "ValidationResult":
+        """Validate a gate.assurance.response_action event (C19)."""
+        return self._validate(event, SCHEMA_RESPONSE_ACTION)
 
     def validate_any(
         self,
@@ -268,3 +302,26 @@ def validate_ledger_event(event: dict[str, Any]) -> ValidationResult:
 
 def validate_replay_trace(trace: dict[str, Any]) -> ValidationResult:
     return _get_default_validator().validate_replay_trace(trace)
+
+
+# ---------------------------------------------------------------------------
+# v1.3 module-level convenience functions
+# ---------------------------------------------------------------------------
+
+def validate_agent_discovered(event):
+    return _get_default_validator().validate_agent_discovered(event)
+
+def validate_agent_remediation_outcome(event):
+    return _get_default_validator().validate_agent_remediation_outcome(event)
+
+def validate_quality_decision(event):
+    return _get_default_validator().validate_quality_decision(event)
+
+def validate_behavioural_baseline(artifact):
+    return _get_default_validator().validate_behavioural_baseline(artifact)
+
+def validate_drift_decision(event):
+    return _get_default_validator().validate_drift_decision(event)
+
+def validate_response_action(event):
+    return _get_default_validator().validate_response_action(event)
