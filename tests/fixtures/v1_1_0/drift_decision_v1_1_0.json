@@ -1,0 +1,22 @@
+{
+  "schema_version": "v1",
+  "event_type": "gate.assurance.drift_decision",
+  "time": "2026-06-16T00:00:00Z",
+  "tenant_id": "acme",
+  "environment": "prod",
+  "baseline_hash": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "abom_hash": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "evaluation_window": {
+    "start": "2026-06-15T00:00:00Z",
+    "end": "2026-06-16T00:00:00Z"
+  },
+  "dimension": "tool_choice",
+  "statistical_test": "chi2",
+  "test_statistic": 12.3,
+  "p_value": 0.001,
+  "threshold": 0.01,
+  "decision": "drift_detected",
+  "contributing_run_count": 1234,
+  "trace_id_sample": ["t-1", "t-2"],
+  "ledger_event_id": "11111111-1111-1111-1111-111111111111"
+}

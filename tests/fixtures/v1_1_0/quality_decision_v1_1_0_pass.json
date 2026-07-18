@@ -1,0 +1,19 @@
+{
+  "schema_version": "v1",
+  "event_type": "gate.memory.quality_decision",
+  "time": "2026-05-01T00:00:00Z",
+  "request_hash": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "item_id": "doc-001",
+  "content_class": "legal_text",
+  "freshness_age_seconds": 100,
+  "confidence_score": 0.9,
+  "provenance_uri": "https://example.com/source",
+  "provenance_hash_verified": true,
+  "quality_bundle_hash": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "outcome": "pass",
+  "flags_set": [],
+  "trace_id": "otel-trace-1",
+  "ledger_event_id": "11111111-1111-1111-1111-111111111111",
+  "tenant_id": "acme",
+  "environment": "prod"
+}

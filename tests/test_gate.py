@@ -1,5 +1,5 @@
 """
-GATE Python — Test Suite
+GATE Python - Test Suite
 ========================
 Run: pytest tests/ -v
      pytest tests/ -v --cov=gate --cov-report=term-missing

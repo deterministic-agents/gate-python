@@ -1,0 +1,61 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Create venv and install
+        run: |
+          python -m venv .venv
+          . .venv/bin/activate
+          python -m pip install --upgrade pip
+          # Runtime deps used by the test suite.
+          pip install pytest jsonschema cryptography pyyaml
+
+      - name: Run tests (includes the cross-language vector suite)
+        run: |
+          . .venv/bin/activate
+          python -m pytest -q
+
+      - name: Assert canonical-JSON vector file digest (cross-repo lockstep)
+        # The same digest is asserted in gate-rust's workflow. The vector file
+        # is the byte-level contract shared with gate-rust; both repos carry an
+        # identical checked-in SHA-256. When the vectors change, update
+        # canonical_json_vectors.sha256 in BOTH repos in the same change.
+        run: |
+          expected="$(cat gate/test_vectors/canonical_json_vectors.sha256)"
+          actual="$(sha256sum gate/test_vectors/canonical_json_vectors.json | awk '{print $1}')"
+          echo "expected=$expected"
+          echo "actual=  $actual"
+          if [ "$expected" != "$actual" ]; then
+            echo "ERROR: vector file digest drifted. Update canonical_json_vectors.sha256 in gate-python AND gate-rust in lockstep." >&2
+            exit 1
+          fi
+
+      - name: Assert round4 differential fixture digest (cross-repo lockstep)
+        # Same lockstep mechanism as the canonical-JSON vectors above. The
+        # round4 differential fixture is the committed cross-language
+        # evidence for half-away-from-zero rounding and negative-zero
+        # normalisation; gate-rust asserts the identical digest. When the
+        # fixture changes, update round4_differential_cases.sha256 in BOTH
+        # repos in the same change.
+        run: |
+          expected="$(cat gate/test_vectors/round4_differential_cases.sha256)"
+          actual="$(sha256sum gate/test_vectors/round4_differential_cases.json | awk '{print $1}')"
+          echo "expected=$expected"
+          echo "actual=  $actual"
+          if [ "$expected" != "$actual" ]; then
+            echo "ERROR: round4 fixture digest drifted. Update round4_differential_cases.sha256 in gate-python AND gate-rust in lockstep." >&2
+            exit 1
+          fi

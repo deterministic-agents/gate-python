@@ -135,19 +135,19 @@ def build_event(
         "tool_request_hash": tool_request_hash,
         "tool_response_hash": tool_response_hash,
     }
-    if trace_id:
+    if trace_id is not None:
         references["trace_id"] = trace_id
-    if replay_trace_step_id:
+    if replay_trace_step_id is not None:
         references["replay_trace_step_id"] = replay_trace_step_id
-    if hitl_approval_id:
+    if hitl_approval_id is not None:
         references["hitl_approval_id"] = hitl_approval_id
-    if invariant_bundle_hash:
+    if invariant_bundle_hash is not None:
         references["invariant_bundle_hash"] = invariant_bundle_hash
 
     governed_action: dict[str, Any] = {"action_type": action_type}
-    if tool_name:
+    if tool_name is not None:
         governed_action["tool_name"] = tool_name
-    if agent_instance_id:
+    if agent_instance_id is not None:
         governed_action["agent_instance_id"] = agent_instance_id
 
     committed_at = _now_iso()
@@ -168,7 +168,7 @@ def build_event(
             "prev_event_hash": prev_event_hash,
             # event_hash not yet set
         },
-        # signatures intentionally omitted here — added AFTER event_hash
+        # signatures intentionally omitted here - added AFTER event_hash
         # is computed so they do not affect the hash input.
         "immutability": {
             "sink_uri": sink_uri,
@@ -181,8 +181,8 @@ def build_event(
         event_body["sequence_number"] = sequence_number
 
     # Compute event_hash over the body (which includes prev_event_hash
-    # but not event_hash itself — that would be circular).
-    # Signatures are NOT in the body at this point — they are added
+    # but not event_hash itself - that would be circular).
+    # Signatures are NOT in the body at this point - they are added
     # after the hash is computed so they don't affect it.
     event_hash = gate_hash(event_body)
     event_body["hash_chain"]["event_hash"] = event_hash
@@ -322,7 +322,7 @@ def verify_chain(
             prev_sequence = seq
 
         # Advance the chain using the stored event_hash
-        # (not the recomputed one — if they differ we already recorded
+        # (not the recomputed one - if they differ we already recorded
         # the error; using stored keeps the chain traversal consistent)
         prev_hash = stored_event_hash
 
@@ -402,7 +402,7 @@ class LedgerChain:
         Accepts all keyword arguments that ``build_event`` accepts,
         except ``prev_event_hash``, ``tenant_id``, ``environment``,
         ``sink_uri``, ``retention_class``, and ``sequence_number``
-        — these are managed by the chain.
+        - these are managed by the chain.
 
         Returns the constructed event dict.
         """
@@ -444,9 +444,9 @@ def _compute_event_hash(event: dict[str, Any]) -> str:
     hash is computed, so they must be absent during verification too).
     """
     body = copy.deepcopy(event)
-    # Remove event_hash — it's what we're computing
+    # Remove event_hash - it's what we're computing
     body.get("hash_chain", {}).pop("event_hash", None)
-    # Remove signatures entirely — they are added post-hash
+    # Remove signatures entirely - they are added post-hash
     body.pop("signatures", None)
     return gate_hash(body)
 

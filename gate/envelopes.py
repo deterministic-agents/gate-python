@@ -22,6 +22,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from .hashing import canonical_json_str, gate_hash
+from .rounding import round4
 
 
 # ---------------------------------------------------------------------------
@@ -183,18 +184,18 @@ def build_request(
     request_hash = gate_hash(payload)
 
     identity_claims: dict[str, Any] = {}
-    if image_digest:
+    if image_digest is not None:
         identity_claims["image_digest"] = image_digest
-    if config_hash:
+    if config_hash is not None:
         identity_claims["config_hash"] = config_hash
-    if toolset_hash:
+    if toolset_hash is not None:
         identity_claims["toolset_hash"] = toolset_hash
 
     bundles: dict[str, str] = {
         "policy_bundle_hash": policy_bundle_hash,
         "tool_schema_hash": tool_schema_hash,
     }
-    if prompt_bundle_hash:
+    if prompt_bundle_hash is not None:
         bundles["prompt_bundle_hash"] = prompt_bundle_hash
 
     tool_entry: dict[str, Any] = {
@@ -202,7 +203,7 @@ def build_request(
         "category": tool_category,
         "risk_tier": risk_tier,
     }
-    if idempotency_key:
+    if idempotency_key is not None:
         tool_entry["idempotency_key"] = idempotency_key
 
     envelope: dict[str, Any] = {
@@ -234,11 +235,11 @@ def build_request(
             "request_hash": request_hash,
         },
         "context": {
-            "orm_risk_score": round(orm_risk_score, 4),
+            "orm_risk_score": round4(orm_risk_score),
             "budgets": {
                 "tokens_remaining": tokens_remaining,
                 "tool_calls_remaining": tool_calls_remaining,
-                "cost_usd_remaining": round(cost_usd_remaining, 4),
+                "cost_usd_remaining": round4(cost_usd_remaining),
             },
             "source_labels": source_labels or [],
             "approval": {
@@ -248,9 +249,9 @@ def build_request(
         },
     }
 
-    if span_id:
+    if span_id is not None:
         envelope["span_id"] = span_id
-    if control_plane_version:
+    if control_plane_version is not None:
         envelope["control_plane_version"] = control_plane_version
 
     return envelope
@@ -290,7 +291,7 @@ def build_response(
         Correlation IDs are copied from it.
     tool_output:
         The raw tool response payload. Must be JSON-serialisable.
-        Will be stored in ``outputs.payload_redacted`` — redact
+        Will be stored in ``outputs.payload_redacted`` - redact
         sensitive fields before passing here.
     status:
         One of ``"success"``, ``"error"``, ``"denied"``, ``"timeout"``.
@@ -332,7 +333,7 @@ def build_response(
         "payload_redacted": tool_output,
         "payload_hash": response_hash,
     }
-    if snapshot_uri:
+    if snapshot_uri is not None:
         outputs["snapshot_uri"] = snapshot_uri
 
     tool_entry: dict[str, Any] = {
@@ -340,11 +341,11 @@ def build_response(
         "status": status,
         "duration_ms": duration_ms,
     }
-    if error_code:
+    if error_code is not None:
         tool_entry["error_code"] = error_code
 
     evidence: dict[str, Any] = {"ledger_event_id": ledger_event_id}
-    if replay_trace_step_id:
+    if replay_trace_step_id is not None:
         evidence["replay_trace_step_id"] = replay_trace_step_id
 
     envelope: dict[str, Any] = {

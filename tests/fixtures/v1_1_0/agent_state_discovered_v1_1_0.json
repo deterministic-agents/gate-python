@@ -1,0 +1,11 @@
+{
+  "schema_version": "v1",
+  "agent_instance_id": "spiffe://acme/agent/unknown",
+  "tenant_id": "acme",
+  "environment": "prod",
+  "state": "Discovered",
+  "discovered_from": "network",
+  "candidate_hash": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+  "owner_identity": null,
+  "updated_at": "2026-05-01T00:00:00Z"
+}

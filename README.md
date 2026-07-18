@@ -1,176 +1,64 @@
-# GATE Python Reference Library
+# gate-python
 
-Reference implementation of the GATE control plane contracts in Python.
+Reference Python library for GATE v1.4 control-plane contracts.
 
-**Governed Agent Trust Environment (GATE)**  
-https://deterministicagents.ai · https://github.com/deterministic-agents/gate-python
-License: CC BY 4.0 - Andrew Stevens
+GATE (Governed Agent Trust Environment) is the deterministic-agents framework
+for governing autonomous AI agents. This library is the reference
+implementation of the GATE contract surface: canonical hashing, envelopes,
+hash-chained ledger events, replay traces, signing, and JSON Schema
+validation for every contract type the framework defines.
 
----
+## Status
 
-## What this is
+- Library version: 1.2.0
+- GATE framework version: 1.4
+- Schemas: gate-contracts v1.2.0 (bundled under `gate/schemas/`)
 
-A set of composable primitives for building a GATE-conformant Tool Gateway.
-Not a full SDK - the modules are independently useful and carry no mandatory
-framework dependency. Pick what you need.
+## Install
 
-| Module | What it does                                                                                |
-|---|---------------------------------------------------------------------------------------------|
-| `gate.hashing` | Canonical JSON (RFC 8785) + SHA-256 hashing - the foundation of all GATE evidence integrity |
-| `gate.envelopes` | `ToolRequestEnvelope` and `ToolResponseEnvelope` construction                               |
-| `gate.ledger` | Hash-chained `LedgerEvent` construction and chain verification                              |
-| `gate.replay` | `ReplayTrace` construction and step recording                                               |
-| `gate.signing` | ES256 action signing and signature verification                                             |
-| `gate.validation` | JSON Schema validation for all GATE contract types                                          |
-| `gate.discovery`           | C17 agent discovery event builders + classifier coverage helper                             |
-| `gate.memory.quality`      | C18 quality gate evaluation + event builder (pure functions)                                |
-| `gate.assurance.behaviour` | C19 drift detection event builders + optional scipy KS / chi-square helper                  |
-
-## Requirements
+PyPI publication is deferred to gate-python v1.3 (GATE v1.5). For v1.4,
+install from the tagged git ref:
 
 ```
-cryptography >= 42.0.0
-jsonschema   >= 4.21.0   (optional - only needed for gate.validation)
-scipy        >= 1.11.0   (optional - only needed for gate.assurance.behaviour.compute_drift_score)
-pyyaml       >= 6.0.1    (optional - only needed for examples)
-pytest       >= 8.0.0    (for running the test suite)
+pip install git+https://github.com/deterministic-agents/gate-python.git@v1.2.0
 ```
 
-Install:
-```bash
-pip install -r requirements.txt
-```
+Optional extras:
 
-## Quickstart
+- `gate-python[assurance]` adds scipy for the C19 drift-score helper.
+- `gate-python[dev]` adds pytest and scipy for the full test suite.
 
-```python
-from gate.hashing import gate_hash, verify_hash
-from gate.envelopes import build_request, build_response
-from gate.ledger import LedgerChain, verify_chain, GENESIS
-from gate.signing import generate_signing_key, sign_event_hash, verify_event_hash_signature
+## Modules
 
-# 1. Build a tool request envelope
-request = build_request(
-    run_id="...", trace_id="...", tenant_id="acme", environment="prod",
-    agent_instance_id="spiffe://org/agent/support#run-1",
-    agent_name="customer-support", agent_version="1.0.0", attested=True,
-    tool_name="read_ticket", tool_category="read_only", risk_tier="low",
-    payload={"ticket_id": "TKT-001"},
-    policy_bundle_hash="sha256:<your-policy-hash>",
-    tool_schema_hash="sha256:<your-schema-hash>",
-)
+- `gate.hashing` Canonical JSON serialisation and SHA-256 hashing
+- `gate.envelopes` Tool request and response envelope construction
+- `gate.ledger` Hash-chained audit ledger event construction and verification
+- `gate.replay` Replay trace construction and step recording
+- `gate.signing` ES256 action signing and signature verification
+- `gate.validation` JSON Schema validation for all GATE contract types
+- `gate.discovery` C17 agent discovery event builders
+- `gate.memory.quality` C18 quality gate evaluation and event builder
+- `gate.assurance.behaviour` C19 drift detection event builders
+- `gate.output` C20 output classification event builder and matrix (new in v1.4)
+- `gate.invariants.break_glass` C09 break-glass record builder and verifier (new in v1.4)
 
-# 2. Verify the request hash (done by the Tool Gateway before policy eval)
-assert verify_hash({"ticket_id": "TKT-001"}, request["hashes"]["request_hash"])
+## What's new in v1.2.0
 
-# 3. Build a ledger chain and add events
-chain = LedgerChain(
-    tenant_id="acme", environment="prod",
-    sink_uri="worm://audit/prod/", retention_class="prod_hot_365d",
-)
-event = chain.append(
-    run_id=request["run_id"],
-    action_type="tool.invoke",
-    policy_decision_id="<decision-uuid>",
-    tool_request_hash=request["hashes"]["request_hash"],
-    tool_response_hash="sha256:<response-hash>",
-)
+- `gate.output` for the C20 output classification surface
+- `gate.invariants.break_glass` for the C09 contracted break-glass record
+- Four new schemas bundled under `gate/schemas/`:
+  `output_classification_event`, `break_glass_record`,
+  `auto_enrolment_policy`, `approved_feed_registry`
+- Three extended schemas: `agent_state` v1.2.0, `abom` v1.2.0,
+  `quality_decision` v1.2.0
+- Four new validators on `gate.validation`
+- `gate/test_vectors/canonical_json_vectors.json` as the cross-language
+  hash-compatibility source consumed by gate-rust
 
-# 4. Verify the chain
-result = verify_chain(chain.events)
-assert result.passed   # True
+See `CHANGELOG-v1.2.0.md` for the full release entry.
 
-# 5. Sign the event hash
-key = generate_signing_key()
-sig = sign_event_hash(
-    event_hash=event["hash_chain"]["event_hash"],
-    private_key=key, key_id="kid-prod-2026-04",
-)
-assert verify_event_hash_signature(
-    event_hash=event["hash_chain"]["event_hash"],
-    signature_record=sig, public_key=key.public_key(),
-)
-```
+## Documentation
 
-## Examples
+Framework and contract documentation: https://deterministicagents.ai/
 
-Three runnable examples covering the full evidence chain:
-
-```bash
-# End-to-end gateway flow: transfer_funds with HITL, invariants, signing
-python examples/tool_gateway_flow.py
-
-# Ledger chain building, verification, and tamper detection
-python examples/verify_ledger_chain.py
-
-# Replay trace recording, export, and hash verification
-python examples/replay_trace_demo.py
-```
-
-## Tests
-
-```bash
-# Run the full test suite (requires pytest)
-pytest tests/ -v
-
-# With coverage
-pytest tests/ -v --cov=gate --cov-report=term-missing
-```
-
-## Critical: canonicalization
-
-All hashes in GATE are computed over **canonical JSON** (RFC 8785):
-keys sorted by Unicode code point, no whitespace, UTF-8 encoded.
-
-`gate.hashing.canonical_json()` implements this correctly.  
-`gate.hashing.gate_hash()` wraps it with SHA-256 and the `sha256:` prefix.
-
-Do not use `json.dumps()` directly - it does not sort keys by default
-and will produce different hashes across implementations.
-
-See `contracts/canonical_json.md` in the artifacts bundle for the full
-specification including implementations in Node.js and Go.
-
-## Key management note
-
-`gate.signing.generate_signing_key()` generates P-256 keys for **testing
-and local development only**. In production, agent signing keys are:
-
-- Derived from or bound to the SPIFFE workload identity
-- Short-lived (rotated with the workload identity TTL)
-- Stored in a KMS, HSM, or TEE — never in the agent runtime
-
-## Structure
-
-```
-gate-python/
-├── gate/
-│   ├── __init__.py
-│   ├── hashing.py      # canonical JSON + SHA-256
-│   ├── envelopes.py    # ToolRequestEnvelope + ToolResponseEnvelope
-│   ├── ledger.py       # LedgerEvent construction + chain verification
-│   ├── replay.py       # ReplayTrace + ReplayRecorder
-│   ├── signing.py      # ES256 signing + verification
-│   └── validation.py   # JSON Schema validation
-├── examples/
-│   ├── tool_gateway_flow.py     # end-to-end gateway flow
-│   ├── verify_ledger_chain.py   # chain build + tamper detection
-│   └── replay_trace_demo.py     # trace recording + verification
-├── tests/
-│   └── test_gate.py             # full test suite (70+ tests)
-└── requirements.txt
-```
-
----
-
-## v1.1.0 (2026-06-16)
-
-Compatible with GATE v1.3. Adds three new modules:
-
-- `gate.discovery` - constructors for the C17 agent.discovered and agent.remediation_outcome events.
-- `gate.memory.quality` - C18 quality gate evaluation (freshness, confidence, provenance) and event constructor. All evaluation functions are pure.
-- `gate.assurance.behaviour` - C19 drift_decision and response_action event constructors, baseline currency check, and an optional scipy-backed KS / chi-square drift score.
-
-`gate/schemas/` now bundles the gate-contracts v1.1.0 schemas with a signed MANIFEST.yaml. `gate.validation.GATEValidator` gains six new `validate_*` methods for the new event types.
-
-Also fixes a pre-existing bug in `gate.ledger.LedgerChain`: invalid `retention_class` now raises `ValueError` at construction time instead of at first append.
+License: MIT (see LICENSE).

@@ -1,0 +1,12 @@
+{
+  "schema_version": "v1",
+  "event_type": "gate.discovery.agent_remediation_outcome",
+  "time": "2026-05-01T01:00:00Z",
+  "tenant_id": "acme",
+  "environment": "prod",
+  "candidate_hash": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "outcome": "enrolled",
+  "owner_identity": "platform-eng",
+  "time_to_remediation_seconds": 3600,
+  "c04_commission_id": "11111111-1111-1111-1111-111111111111"
+}

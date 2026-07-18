@@ -1,0 +1,155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deterministicagents.ai/gate/v1/contracts/break_glass_record.schema.json",
+  "title": "GATE Break-Glass Record (C09)",
+  "description": "Signed authorisation artifact for an emergency override of a C09 invariant halt. This is a record, not an event. The invariant halt event in the audit ledger (C11) references this record by record_id via its break_glass_record_id field. Dual approval is enforced at schema level (approver_ids minItems 2 with uniqueItems true). The verification policy in gate-policies (policies/invariants/c09_break_glass_verification.rego) evaluates each override attempt against this record before honouring it; the policy enforces three cross-field invariants the schema does not express: (a) signing_key_ids and signatures arrays have equal length and are pairwise corresponding, (b) for time_window scope, time_window_start is strictly earlier than exception_expires_at, (c) the halt event's tenant_id and environment match the record's. This schema sets additionalProperties to false (deviating from the v1.3 repo-wide permissive default) because break-glass is a security-critical artifact where any undeclared field in a signed record could be used to smuggle unverified data past audit; the deviation is deliberate. See C09 in the framework paper v1.4 for the override flow.",
+  "version": "1.0.0",
+  "type": "object",
+
+  "required": [
+    "schema_version",
+    "record_id",
+    "invariant_halt_event_id",
+    "invariant_rule_id",
+    "tenant_id",
+    "environment",
+    "approver_ids",
+    "justification",
+    "exception_scope",
+    "exception_expires_at",
+    "signing_key_ids",
+    "signatures",
+    "created_at",
+    "gate_version"
+  ],
+
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "v1"
+    },
+
+    "record_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier for this break-glass record."
+    },
+
+    "invariant_halt_event_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Audit ledger event ID of the invariant halt that triggered this record's creation. Single-valued in both scope cases. For exception_scope=specific_run the record authorises only this one override. For exception_scope=time_window this is the triggering halt event; subsequent halt events of the same invariant_rule_id within the window resolve against this same record without producing new records."
+    },
+
+    "invariant_rule_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Identifier of the C09 invariant rule the override applies to. The verification policy denies override attempts whose halt event invariant_rule_id does not match this value."
+    },
+
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Tenant scope of the authorisation. The verification policy denies any override attempt against a halt event from a different tenant."
+    },
+
+    "environment": {
+      "type": "string",
+      "enum": ["dev", "test", "prod"],
+      "description": "Environment scope of the authorisation. The verification policy denies any override attempt against a halt event from a different environment."
+    },
+
+    "approver_ids": {
+      "type": "array",
+      "minItems": 2,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Authenticated identity of an approver (role + user ID), matching the convention used by hitl_decision_record.approver_id."
+      },
+      "description": "Dual approval enforced at schema level: minimum two entries, uniqueness required so the same identity cannot count twice. The verification policy further checks approver presence at evaluation time."
+    },
+
+    "justification": {
+      "type": "string",
+      "minLength": 50,
+      "description": "Free-text justification for the override. Minimum 50 characters to discourage trivial justifications. Per C09 v1.4 paper guidance, the justification should name the operational reason and the expected duration of the override episode."
+    },
+
+    "exception_scope": {
+      "type": "string",
+      "enum": ["specific_run", "time_window"],
+      "description": "Discriminator over the two authorisation shapes. specific_run authorises the single override against the halt event named in invariant_halt_event_id and only that override; time_window additionally authorises subsequent halt events of the same invariant_rule_id occurring within [time_window_start, exception_expires_at]."
+    },
+
+    "time_window_start": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Start of the time window. Required when exception_scope is time_window. MUST be absent when exception_scope is specific_run."
+    },
+
+    "exception_expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "For specific_run scope: deadline by which the single authorised override must be exercised. For time_window scope: end of the authorisation window. Beyond this time, the verification policy denies any override attempt that resolves against this record."
+    },
+
+    "signing_key_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Identifiers of the signing keys used to produce signatures. One entry per signature in the signatures array, in the same order."
+    },
+
+    "signatures": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Base64url signature over canonical-JSON serialisation of the record body excluding the signatures field itself."
+      },
+      "description": "Cryptographic signatures over the canonical-JSON record body. The verification policy MUST validate all signatures against the keys listed in signing_key_ids before honouring the override. The number of signatures and signing_key_ids must match; this length match is enforced in the verification policy, not at schema level."
+    },
+
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Wall-clock time the record was issued. Used for audit replay (when was this authorisation issued). The policy lower bound for time_window scope is time_window_start, not created_at; the two are independent so that an authorisation can be issued ahead of the window it covers."
+    },
+
+    "gate_version": {
+      "type": "string",
+      "description": "GATE framework version under which this record was issued (e.g. \"1.4\"). Used by the verification policy to apply version-appropriate validation rules."
+    }
+  },
+
+  "additionalProperties": false,
+
+  "allOf": [
+    {
+      "if": {
+        "properties": { "exception_scope": { "const": "time_window" } },
+        "required": ["exception_scope"]
+      },
+      "then": {
+        "required": ["time_window_start"]
+      }
+    },
+    {
+      "if": {
+        "properties": { "exception_scope": { "const": "specific_run" } },
+        "required": ["exception_scope"]
+      },
+      "then": {
+        "not": {
+          "required": ["time_window_start"]
+        }
+      }
+    }
+  ]
+}

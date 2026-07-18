@@ -80,6 +80,12 @@ SCHEMA_BEHAVIOURAL_BASELINE = "behavioural_baseline.schema.json"
 SCHEMA_DRIFT_DECISION = "drift_decision.schema.json"
 SCHEMA_RESPONSE_ACTION = "response_action.schema.json"
 
+# v1.4 additions
+SCHEMA_OUTPUT_CLASSIFICATION_EVENT = "output_classification_event.schema.json"
+SCHEMA_BREAK_GLASS_RECORD = "break_glass_record.schema.json"
+SCHEMA_AUTO_ENROLMENT_POLICY = "auto_enrolment_policy.schema.json"
+SCHEMA_APPROVED_FEED_REGISTRY = "approved_feed_registry.schema.json"
+
 
 # ---------------------------------------------------------------------------
 # Validator
@@ -196,6 +202,32 @@ class GATEValidator:
         """Validate a gate.assurance.response_action event (C19)."""
         return self._validate(event, SCHEMA_RESPONSE_ACTION)
 
+    # ----- v1.4 validators -----
+
+    def validate_output_classification_event(
+        self, event: dict[str, Any]
+    ) -> "ValidationResult":
+        """Validate a gate.output.classification event (C20)."""
+        return self._validate(event, SCHEMA_OUTPUT_CLASSIFICATION_EVENT)
+
+    def validate_break_glass_record(
+        self, record: dict[str, Any]
+    ) -> "ValidationResult":
+        """Validate a signed break_glass_record artifact (C09 v1.4)."""
+        return self._validate(record, SCHEMA_BREAK_GLASS_RECORD)
+
+    def validate_auto_enrolment_policy(
+        self, policy: dict[str, Any]
+    ) -> "ValidationResult":
+        """Validate an auto_enrolment_policy artifact (C17 fast-path)."""
+        return self._validate(policy, SCHEMA_AUTO_ENROLMENT_POLICY)
+
+    def validate_approved_feed_registry(
+        self, registry: dict[str, Any]
+    ) -> "ValidationResult":
+        """Validate an approved_feed_registry artifact (C18 v1.4)."""
+        return self._validate(registry, SCHEMA_APPROVED_FEED_REGISTRY)
+
     def validate_any(
         self,
         obj: dict[str, Any],
@@ -261,11 +293,11 @@ class ValidationResult:
     def summary(self) -> str:
         """Return a human-readable summary string."""
         if self.valid:
-            return f"PASS — {self.schema}"
+            return f"PASS - {self.schema}"
         error_strs = [
             f"  [{e.json_path}] {e.message}" for e in self.errors
         ]
-        return "FAIL — {}:\n{}".format(self.schema, "\n".join(error_strs))
+        return "FAIL - {}:\n{}".format(self.schema, "\n".join(error_strs))
 
 
 class GATEValidationError(Exception):
@@ -325,3 +357,23 @@ def validate_drift_decision(event):
 
 def validate_response_action(event):
     return _get_default_validator().validate_response_action(event)
+
+
+# ---------------------------------------------------------------------------
+# v1.4 module-level convenience functions
+# ---------------------------------------------------------------------------
+
+def validate_output_classification_event(event):
+    return _get_default_validator().validate_output_classification_event(event)
+
+
+def validate_break_glass_record(record):
+    return _get_default_validator().validate_break_glass_record(record)
+
+
+def validate_auto_enrolment_policy(policy):
+    return _get_default_validator().validate_auto_enrolment_policy(policy)
+
+
+def validate_approved_feed_registry(registry):
+    return _get_default_validator().validate_approved_feed_registry(registry)

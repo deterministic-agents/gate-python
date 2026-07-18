@@ -1,0 +1,13 @@
+{
+  "schema_version": "v1",
+  "agent_instance_id": "spiffe://acme/agent/biller#run-2",
+  "agent_name": "biller",
+  "agent_version": "1.4.0",
+  "tenant_id": "acme",
+  "environment": "prod",
+  "state": "Commissioned",
+  "owner_identity": "team-finance",
+  "abom_hash": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+  "updated_at": "2026-05-02T00:00:00Z",
+  "commissioned_at": "2026-04-30T00:00:00Z"
+}

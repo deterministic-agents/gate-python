@@ -2,35 +2,65 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://deterministicagents.ai/gate/v1/contracts/agent_state.schema.json",
   "title": "GATE Agent Lifecycle State (C04)",
-  "description": "C04 lifecycle state of an agent in the inventory. v1.3 adds the 'Discovered' entry state to receive candidates from the C17 discovery plane. Agents must traverse Discovered (or be Commissioned via a declared path) before reaching Run.",
-  "version": "1.1.0",
+  "description": "C04 lifecycle state of an agent in the inventory. v1.3 adds the 'Discovered' entry state to receive candidates from the C17 discovery plane. v1.4 adds the 'AutoEnrolled' state to mark agents enrolled through the C17 automated enrolment fast-path, plus auto_enrolment_policy_hash and enrolment_mode so the fast-path decision is replayable and the manual-vs-automated audit trail is explicit. Agents must traverse Discovered (or be Commissioned via a declared path) before reaching Run.",
+  "version": "1.2.0",
   "type": "object",
-
   "required": [
-    "schema_version", "agent_instance_id",
-    "tenant_id", "environment",
-    "state", "owner_identity",
+    "schema_version",
+    "agent_instance_id",
+    "tenant_id",
+    "environment",
+    "state",
+    "owner_identity",
     "updated_at"
   ],
-
   "properties": {
-    "schema_version": { "type": "string", "const": "v1" },
-
-    "agent_instance_id": { "type": "string", "description": "Workload identity (SPIFFE ID or equivalent)." },
-    "agent_name":        { "type": "string" },
-    "agent_version":     { "type": "string" },
-    "tenant_id":         { "type": "string" },
-    "environment":       { "type": "string", "enum": ["dev", "test", "prod"] },
-
+    "schema_version": {
+      "type": "string",
+      "const": "v1"
+    },
+    "agent_instance_id": {
+      "type": "string",
+      "description": "Workload identity (SPIFFE ID or equivalent)."
+    },
+    "agent_name": {
+      "type": "string"
+    },
+    "agent_version": {
+      "type": "string"
+    },
+    "tenant_id": {
+      "type": "string"
+    },
+    "environment": {
+      "type": "string",
+      "enum": [
+        "dev",
+        "test",
+        "prod"
+      ]
+    },
     "state": {
       "type": "string",
-      "enum": ["Discovered", "Commissioned", "Run", "Quiesce", "Decommissioned", "Terminated"],
-      "description": "Lifecycle state. Discovered is the v1.3 entry state for C17 candidates pending classification or remediation. Terminated is the v1.3 outcome for candidates that failed remediation."
+      "enum": [
+        "Discovered",
+        "AutoEnrolled",
+        "Commissioned",
+        "Run",
+        "Quiesce",
+        "Decommissioned",
+        "Terminated"
+      ],
+      "description": "Lifecycle state. Discovered is the v1.3 entry state for C17 candidates pending classification or remediation. AutoEnrolled is the v1.4 state for candidates enrolled through the C17 automated fast-path; the runtime treats AutoEnrolled as a valid pre-Run state on the same footing as Commissioned. Terminated is the v1.3 outcome for candidates that failed remediation."
     },
-
     "discovered_from": {
       "type": "string",
-      "enum": ["network", "asset_inventory", "identity_classifier", "tool_gateway_ingress"],
+      "enum": [
+        "network",
+        "asset_inventory",
+        "identity_classifier",
+        "tool_gateway_ingress"
+      ],
       "description": "Detection boundary that raised the discovery event. Required when state is 'Discovered'."
     },
     "candidate_hash": {
@@ -38,24 +68,119 @@
       "pattern": "^sha256:[a-f0-9]{64}$",
       "description": "Foreign key to the originating gate.discovery.agent_discovered event. Required when state is 'Discovered'."
     },
-
-    "owner_identity":     { "type": ["string", "null"], "description": "Team or individual accountable. Null only when state is 'Discovered' or 'Terminated'." },
-    "abom_hash":          { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$", "description": "Required when state is 'Commissioned' or 'Run'." },
-    "current_baseline_hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$", "description": "Active C19 baseline. Required at bounded or high-privilege tier when state is 'Run'." },
-
-    "updated_at":         { "type": "string", "format": "date-time" },
-    "commissioned_at":    { "type": "string", "format": "date-time" },
-    "decommissioned_at":  { "type": "string", "format": "date-time" }
+    "auto_enrolment_policy_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Hash of the C17 auto_enrolment_policy in force at the moment of fast-path enrolment. Required (enforced by the verification policy, not the schema) whenever enrolment_mode is 'automated'. Recorded so the fast-path decision is replayable against the historical policy."
+    },
+    "enrolment_mode": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "automated"
+      ],
+      "description": "How the agent reached Commissioned or AutoEnrolled state. Absent when state is 'Discovered'. Present in all post-enrolment states. 'manual' indicates Discovered -> Commissioned via human Commission. 'automated' indicates Discovered -> AutoEnrolled via the C17 fast-path."
+    },
+    "owner_identity": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Team or individual accountable. Null only when state is 'Discovered' or 'Terminated'."
+    },
+    "abom_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Required when state is 'Commissioned' or 'Run'."
+    },
+    "current_baseline_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Active C19 baseline. Required at bounded or high-privilege tier when state is 'Run'."
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "commissioned_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "decommissioned_at": {
+      "type": "string",
+      "format": "date-time"
+    }
   },
-
   "allOf": [
     {
-      "if": { "properties": { "state": { "const": "Discovered" } } },
-      "then": { "required": ["discovered_from", "candidate_hash"] }
+      "if": {
+        "properties": {
+          "state": {
+            "const": "Discovered"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "discovered_from",
+          "candidate_hash"
+        ]
+      }
     },
     {
-      "if": { "properties": { "state": { "enum": ["Commissioned", "Run"] } } },
-      "then": { "required": ["abom_hash", "owner_identity"] }
+      "if": {
+        "properties": {
+          "state": {
+            "enum": [
+              "Commissioned",
+              "AutoEnrolled",
+              "Run"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "abom_hash",
+          "owner_identity"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "AutoEnrolled"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "enrolment_mode"
+        ],
+        "properties": {
+          "enrolment_mode": {
+            "const": "automated"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "enrolment_mode": {
+            "const": "automated"
+          }
+        },
+        "required": [
+          "enrolment_mode"
+        ]
+      },
+      "then": {
+        "required": [
+          "auto_enrolment_policy_hash"
+        ]
+      }
     }
   ]
 }

@@ -1,0 +1,307 @@
+{
+  "version": "1.1",
+  "description": "Canonical JSON + sha256 vectors. Inputs paired with their RFC 8785 canonical-JSON bytes (base64-encoded) and GATE-format sha256 hashes. Authoritative cross-language compatibility source for the gate.hashing module; consumed by gate-rust (Workstream 6).",
+  "vectors": [
+    {
+      "id": "v001_empty_object",
+      "description": "Empty object",
+      "input": {},
+      "canonical_json_base64": "e30=",
+      "sha256": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "id": "v002_empty_array",
+      "description": "Empty array",
+      "input": [],
+      "canonical_json_base64": "W10=",
+      "sha256": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "id": "v003_keys_require_sort",
+      "description": "Top-level keys requiring sort by Unicode code point",
+      "input": {
+        "z": 1,
+        "a": 2,
+        "m": 3
+      },
+      "canonical_json_base64": "eyJhIjoyLCJtIjozLCJ6IjoxfQ==",
+      "sha256": "sha256:ebba85cfdc0a724b6cc327ecc545faeb38b9fe02eca603b430eb872f5cf75370"
+    },
+    {
+      "id": "v004_nested_keys_require_sort",
+      "description": "Nested objects with keys requiring sort",
+      "input": {
+        "z": {
+          "z": 1,
+          "a": 2
+        },
+        "a": {
+          "z": 3,
+          "a": 4,
+          "m": {
+            "y": 5,
+            "x": 6
+          }
+        }
+      },
+      "canonical_json_base64": "eyJhIjp7ImEiOjQsIm0iOnsieCI6NiwieSI6NX0sInoiOjN9LCJ6Ijp7ImEiOjIsInoiOjF9fQ==",
+      "sha256": "sha256:b3e433a437e8967c8a754cec532c3cd33c3a70df0b01e53017331e9d2ca6b62f"
+    },
+    {
+      "id": "v005_unicode_keys_and_values",
+      "description": "Non-ASCII keys and values including non-BMP emoji",
+      "input": {
+        "ascii": "value",
+        "héllo": "world",
+        "emoji": "rocket 🚀",
+        "中文": "test"
+      },
+      "canonical_json_base64": "eyJhc2NpaSI6InZhbHVlIiwiZW1vamkiOiJyb2NrZXQg8J+agCIsImjDqWxsbyI6IndvcmxkIiwi5Lit5paHIjoidGVzdCJ9",
+      "sha256": "sha256:8d2b2ed3fc8995941b80b9ecc93c7f7dcc895a90d39822daa41cf8c8dafbda41"
+    },
+    {
+      "id": "v006_number_boundaries",
+      "description": "Integer / float distinction, large integers, negative zero",
+      "input": {
+        "int_zero": 0,
+        "int_negative": -42,
+        "int_large": 9007199254740992,
+        "float_simple": 1.5,
+        "float_negative_zero": -0.0,
+        "float_small_positive": 0.1
+      },
+      "canonical_json_base64": "eyJmbG9hdF9uZWdhdGl2ZV96ZXJvIjotMC4wLCJmbG9hdF9zaW1wbGUiOjEuNSwiZmxvYXRfc21hbGxfcG9zaXRpdmUiOjAuMSwiaW50X2xhcmdlIjo5MDA3MTk5MjU0NzQwOTkyLCJpbnRfbmVnYXRpdmUiOi00MiwiaW50X3plcm8iOjB9",
+      "sha256": "sha256:5a139d3206fd079ecf2453aaca46196ddb932bfc8681940f7870fd1b62fb5403"
+    },
+    {
+      "id": "v007_string_escapes",
+      "description": "Strings with backslash, quote, and control characters",
+      "input": {
+        "backslash": "a\\b",
+        "quote": "a\"b",
+        "newline": "line1\nline2",
+        "tab": "col1\tcol2",
+        "control_null_byte_safe": "ok\u0001end"
+      },
+      "canonical_json_base64": "eyJiYWNrc2xhc2giOiJhXFxiIiwiY29udHJvbF9udWxsX2J5dGVfc2FmZSI6Im9rXHUwMDAxZW5kIiwibmV3bGluZSI6ImxpbmUxXG5saW5lMiIsInF1b3RlIjoiYVwiYiIsInRhYiI6ImNvbDFcdGNvbDIifQ==",
+      "sha256": "sha256:49e609f3dbf54add803e18199c29871d51b200a7edbf3663f2df2a0ea336ffc9"
+    },
+    {
+      "id": "v008_boolean_and_null",
+      "description": "Boolean true / false and null literals",
+      "input": {
+        "yes": true,
+        "no": false,
+        "absent": null
+      },
+      "canonical_json_base64": "eyJhYnNlbnQiOm51bGwsIm5vIjpmYWxzZSwieWVzIjp0cnVlfQ==",
+      "sha256": "sha256:02166df34433eebc60955bdb6f4a7fb25c70fa61fd2b85480edef5762126c8dc"
+    },
+    {
+      "id": "v009_array_order_preserved",
+      "description": "Array element order is preserved (not sorted)",
+      "input": {
+        "arr": [
+          3,
+          1,
+          2,
+          5,
+          4
+        ]
+      },
+      "canonical_json_base64": "eyJhcnIiOlszLDEsMiw1LDRdfQ==",
+      "sha256": "sha256:909759c3b6e27bb12892bffb428a62457382d6ebc4b9bce1a641fe7335f7d8c0"
+    },
+    {
+      "id": "v010_nested_arrays_objects",
+      "description": "Mixed arrays of objects with sorted-key requirement",
+      "input": [
+        {
+          "z": 1,
+          "a": 2
+        },
+        {
+          "b": [
+            3,
+            1,
+            2
+          ],
+          "a": {
+            "y": 1,
+            "x": 2
+          }
+        }
+      ],
+      "canonical_json_base64": "W3siYSI6MiwieiI6MX0seyJhIjp7IngiOjIsInkiOjF9LCJiIjpbMywxLDJdfV0=",
+      "sha256": "sha256:7cf8b3cc1dcc45e9c1a59ca04e4231dc3b28af5485d503abd391a903991abf18"
+    },
+    {
+      "id": "v011_tool_request_envelope_shape",
+      "description": "ToolRequestEnvelope-shaped payload (subset)",
+      "input": {
+        "schema_version": "v1",
+        "event_type": "gate.tool.request",
+        "run_id": "11111111-1111-1111-1111-111111111111",
+        "trace_id": "trace-abc",
+        "tenant_id": "acme",
+        "environment": "prod",
+        "agent": {
+          "agent_instance_id": "spiffe://org/agent/test#run-1",
+          "agent_name": "test-agent",
+          "agent_version": "1.0.0",
+          "identity": {
+            "subject": "spiffe://org/agent/test",
+            "attested": true
+          }
+        },
+        "tool": {
+          "name": "read_ticket",
+          "category": "read_only",
+          "risk_tier": "low"
+        },
+        "inputs": {
+          "content_type": "application/json",
+          "payload": {
+            "ticket_id": "TKT-001"
+          }
+        }
+      },
+      "canonical_json_base64": "eyJhZ2VudCI6eyJhZ2VudF9pbnN0YW5jZV9pZCI6InNwaWZmZTovL29yZy9hZ2VudC90ZXN0I3J1bi0xIiwiYWdlbnRfbmFtZSI6InRlc3QtYWdlbnQiLCJhZ2VudF92ZXJzaW9uIjoiMS4wLjAiLCJpZGVudGl0eSI6eyJhdHRlc3RlZCI6dHJ1ZSwic3ViamVjdCI6InNwaWZmZTovL29yZy9hZ2VudC90ZXN0In19LCJlbnZpcm9ubWVudCI6InByb2QiLCJldmVudF90eXBlIjoiZ2F0ZS50b29sLnJlcXVlc3QiLCJpbnB1dHMiOnsiY29udGVudF90eXBlIjoiYXBwbGljYXRpb24vanNvbiIsInBheWxvYWQiOnsidGlja2V0X2lkIjoiVEtULTAwMSJ9fSwicnVuX2lkIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwic2NoZW1hX3ZlcnNpb24iOiJ2MSIsInRlbmFudF9pZCI6ImFjbWUiLCJ0b29sIjp7ImNhdGVnb3J5IjoicmVhZF9vbmx5IiwibmFtZSI6InJlYWRfdGlja2V0Iiwicmlza190aWVyIjoibG93In0sInRyYWNlX2lkIjoidHJhY2UtYWJjIn0=",
+      "sha256": "sha256:9530c3b4d0c4c2f24d4a2d9dd152ed3b9b597e251bdbd5f359538bee300fbb28"
+    },
+    {
+      "id": "v012_break_glass_record_body",
+      "description": "Break-glass record body (signatures excluded; v1.4 shape)",
+      "input": {
+        "schema_version": "v1",
+        "record_id": "22222222-2222-2222-2222-222222222222",
+        "invariant_halt_event_id": "33333333-3333-3333-3333-333333333333",
+        "invariant_rule_id": "INV-DELETE-001",
+        "tenant_id": "acme",
+        "environment": "prod",
+        "approver_ids": [
+          "role:sec-lead/u-alice",
+          "role:eng-vp/u-bob"
+        ],
+        "justification": "Emergency override for incident #4421; halt at 02:13 UTC blocks recovery of customer-impacting deploy rollback per runbook RB-09.",
+        "exception_scope": "specific_run",
+        "exception_expires_at": "2026-06-23T03:00:00Z",
+        "signing_key_ids": [
+          "kid-sec-lead-2026",
+          "kid-eng-vp-2026"
+        ],
+        "created_at": "2026-06-23T02:15:00Z",
+        "gate_version": "1.4"
+      },
+      "canonical_json_base64": "eyJhcHByb3Zlcl9pZHMiOlsicm9sZTpzZWMtbGVhZC91LWFsaWNlIiwicm9sZTplbmctdnAvdS1ib2IiXSwiY3JlYXRlZF9hdCI6IjIwMjYtMDYtMjNUMDI6MTU6MDBaIiwiZW52aXJvbm1lbnQiOiJwcm9kIiwiZXhjZXB0aW9uX2V4cGlyZXNfYXQiOiIyMDI2LTA2LTIzVDAzOjAwOjAwWiIsImV4Y2VwdGlvbl9zY29wZSI6InNwZWNpZmljX3J1biIsImdhdGVfdmVyc2lvbiI6IjEuNCIsImludmFyaWFudF9oYWx0X2V2ZW50X2lkIjoiMzMzMzMzMzMtMzMzMy0zMzMzLTMzMzMtMzMzMzMzMzMzMzMzIiwiaW52YXJpYW50X3J1bGVfaWQiOiJJTlYtREVMRVRFLTAwMSIsImp1c3RpZmljYXRpb24iOiJFbWVyZ2VuY3kgb3ZlcnJpZGUgZm9yIGluY2lkZW50ICM0NDIxOyBoYWx0IGF0IDAyOjEzIFVUQyBibG9ja3MgcmVjb3Zlcnkgb2YgY3VzdG9tZXItaW1wYWN0aW5nIGRlcGxveSByb2xsYmFjayBwZXIgcnVuYm9vayBSQi0wOS4iLCJyZWNvcmRfaWQiOiIyMjIyMjIyMi0yMjIyLTIyMjItMjIyMi0yMjIyMjIyMjIyMjIiLCJzY2hlbWFfdmVyc2lvbiI6InYxIiwic2lnbmluZ19rZXlfaWRzIjpbImtpZC1zZWMtbGVhZC0yMDI2Iiwia2lkLWVuZy12cC0yMDI2Il0sInRlbmFudF9pZCI6ImFjbWUifQ==",
+      "sha256": "sha256:b187d2e41b9c67d122a784fc9f08cfbd35a82a5ab51c8105b7becb47285b8364"
+    },
+    {
+      "id": "v013_output_classification_event_body",
+      "description": "Output classification event body (v1.4 shape)",
+      "input": {
+        "schema_version": "v1",
+        "event_type": "gate.output.classification",
+        "time": "2026-06-23T02:00:00Z",
+        "run_id": "44444444-4444-4444-4444-444444444444",
+        "trace_id": "trace-out-1",
+        "tenant_id": "acme",
+        "environment": "prod",
+        "output_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "classification": {
+          "sensitivity_tier": "high",
+          "regulated_categories": [
+            "medical"
+          ],
+          "confidence_score": 0.87,
+          "requires_human_review": true
+        },
+        "obligations": [
+          "hitl_review",
+          "redact_fields"
+        ],
+        "bundle_hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "ledger_event_id": "55555555-5555-5555-5555-555555555555"
+      },
+      "canonical_json_base64": "eyJidW5kbGVfaGFzaCI6InNoYTI1NjpiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiIiwiY2xhc3NpZmljYXRpb24iOnsiY29uZmlkZW5jZV9zY29yZSI6MC44NywicmVndWxhdGVkX2NhdGVnb3JpZXMiOlsibWVkaWNhbCJdLCJyZXF1aXJlc19odW1hbl9yZXZpZXciOnRydWUsInNlbnNpdGl2aXR5X3RpZXIiOiJoaWdoIn0sImVudmlyb25tZW50IjoicHJvZCIsImV2ZW50X3R5cGUiOiJnYXRlLm91dHB1dC5jbGFzc2lmaWNhdGlvbiIsImxlZGdlcl9ldmVudF9pZCI6IjU1NTU1NTU1LTU1NTUtNTU1NS01NTU1LTU1NTU1NTU1NTU1NSIsIm9ibGlnYXRpb25zIjpbImhpdGxfcmV2aWV3IiwicmVkYWN0X2ZpZWxkcyJdLCJvdXRwdXRfaGFzaCI6InNoYTI1NjphYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhIiwicnVuX2lkIjoiNDQ0NDQ0NDQtNDQ0NC00NDQ0LTQ0NDQtNDQ0NDQ0NDQ0NDQ0Iiwic2NoZW1hX3ZlcnNpb24iOiJ2MSIsInRlbmFudF9pZCI6ImFjbWUiLCJ0aW1lIjoiMjAyNi0wNi0yM1QwMjowMDowMFoiLCJ0cmFjZV9pZCI6InRyYWNlLW91dC0xIn0=",
+      "sha256": "sha256:4225b9e36082b929007fa5fb48c3c650c3d5e6141fd416d7858d43b21d1b1eab"
+    },
+    {
+      "id": "v014_empty_string_optional_field",
+      "description": "Empty-string values are serialised (not omitted). Locks the item-18 optional-field rule at the canonical-JSON layer: gate-python and gate-rust both emit an empty string as \"\", so an optional field set to \"\" hashes identically. Only None/absent fields are omitted, and that omission happens in the builder, not here.",
+      "input": {
+        "optional_field": "",
+        "present": "value",
+        "nested": {
+          "also_empty": "",
+          "x": 1
+        }
+      },
+      "canonical_json_base64": "eyJuZXN0ZWQiOnsiYWxzb19lbXB0eSI6IiIsIngiOjF9LCJvcHRpb25hbF9maWVsZCI6IiIsInByZXNlbnQiOiJ2YWx1ZSJ9",
+      "sha256": "sha256:405f4301e6a987ec80cb24bb88527075c4a200769059ad7e8e42bdd0bf457d69"
+    }
+  ],
+  "negative_vectors": [
+    {
+      "id": "n001_small_exponent_1e-7",
+      "description": "Positive exponent below the 4dp subspace. Python emits 1e-07, Rust emits 1e-7: exponent zero-padding diverges. round4 collapses it to 0.0.",
+      "input": "1e-7",
+      "input_is_string": true,
+      "raw_python_canonical": "1e-07",
+      "raw_rust_canonical": "1e-7",
+      "raw_diverges": true,
+      "normalise_via": "round4",
+      "normalised_canonical_base64": "MC4w",
+      "normalised_sha256": "sha256:8aed642bf5118b9d3c859bd4be35ecac75b6e873cce34e7b6f554b06f75550d7"
+    },
+    {
+      "id": "n002_small_exponent_5.96e-8",
+      "description": "Python emits 5.96e-08, Rust emits 5.96e-8: exponent zero-padding diverges. round4 collapses it to 0.0.",
+      "input": "5.96e-8",
+      "input_is_string": true,
+      "raw_python_canonical": "5.96e-08",
+      "raw_rust_canonical": "5.96e-8",
+      "raw_diverges": true,
+      "normalise_via": "round4",
+      "normalised_canonical_base64": "MC4w",
+      "normalised_sha256": "sha256:8aed642bf5118b9d3c859bd4be35ecac75b6e873cce34e7b6f554b06f75550d7"
+    },
+    {
+      "id": "n003_seventeen_sig_digits",
+      "description": "17-significant-digit double. Python (dtoa) and Rust (ryu) agree on this particular value's shortest form, but 17-digit doubles are outside the 4dp subspace and other values in this class do diverge; round4 collapses it to 0.1235.",
+      "input": "0.12345678901234567",
+      "input_is_string": true,
+      "raw_python_canonical": "0.12345678901234566",
+      "raw_rust_canonical": "0.12345678901234566",
+      "raw_diverges": false,
+      "normalise_via": "round4",
+      "normalised_canonical_base64": "MC4xMjM1",
+      "normalised_sha256": "sha256:bcf409d8641e2c5eb60dfa23db56d1d4d4731f8823c3ca5134ac8adbbb47b8ee"
+    },
+    {
+      "id": "n004_two_pow_53",
+      "description": "2^53, the largest run of exactly representable consecutive integers as f64. Outside the 4dp subspace; integers above 2^53 lose precision. Must be normalised, not stored raw.",
+      "input": "9007199254740992.0",
+      "input_is_string": true,
+      "raw_python_canonical": "9007199254740992.0",
+      "raw_rust_canonical": "9007199254740992.0",
+      "raw_diverges": false,
+      "normalise_via": "round4",
+      "normalised_canonical_base64": "OTAwNzE5OTI1NDc0MDk5Mi4w",
+      "normalised_sha256": "sha256:0ad10bbdda8db20784fb3edc08722b255b8da67f2a12bb58ec32994ba4a3596e"
+    },
+    {
+      "id": "n005_above_u64_max",
+      "description": "A double above u64::MAX. Far outside the hashable subspace; documented for completeness.",
+      "input": "1.8446744073709552e19",
+      "input_is_string": true,
+      "raw_python_canonical": "1.8446744073709552e+19",
+      "raw_rust_canonical": "1.8446744073709552e+19",
+      "raw_diverges": false,
+      "normalise_via": "round4",
+      "normalised_canonical_base64": "MS44NDQ2NzQ0MDczNzA5NTUyZSsxOQ==",
+      "normalised_sha256": "sha256:7e7e9a94b89d2f5e1a317a4896bacf04ce3e6fb1cf2417fcacbd840113196b2f"
+    }
+  ],
+  "negative_vectors_note": "Values that MUST NOT enter a hashed surface raw. 'input' is a DECIMAL STRING so both serialisers parse identical text; parse it to a float before use. Each 'input' is outside the hashable float subspace (canonical_json.md: round to at most 4 decimal places at hashing boundaries). raw_python_canonical / raw_rust_canonical record each serialiser's raw output; where raw_diverges is true they differ (the exponent cases). After round4 both serialisers agree on normalised_canonical_base64 / normalised_sha256. Both language suites assert their own raw output and the shared normalised output."
+}

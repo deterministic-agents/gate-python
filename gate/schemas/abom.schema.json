@@ -2,8 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://deterministicagents.ai/gate/v1/contracts/abom.schema.json",
   "title": "GATE Agent Bill of Materials (ABOM)",
-  "description": "Authoritative manifest for an agent version: model, prompt bundle, tool schema set, invariant bundle, policy bundle. v1.3 adds current_baseline_hash so the C19 baseline is tied to the ABOM version.",
-  "version": "1.1.0",
+  "description": "Authoritative manifest for an agent version: model, prompt bundle, tool schema set, invariant bundle, policy bundle. v1.3 adds current_baseline_hash so the C19 baseline is tied to the ABOM version. v1.4 adds output_classification_bundle_hash so the C20 bundle in force for this agent is recorded, and auto_enrolment_eligible so the C17 fast-path eligibility is an ABOM property rather than a per-deployment policy lookup.",
+  "version": "1.2.0",
   "type": "object",
 
   "required": [
@@ -52,6 +52,17 @@
     "memory_quality_bundle_hash": {
       "type": "string", "pattern": "^sha256:[a-f0-9]{64}$",
       "description": "Hash of the active C18 quality bundle in force for this agent. Recorded in every quality_decision event."
+    },
+
+    "output_classification_bundle_hash": {
+      "type": "string", "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Hash of the active C20 output classification bundle for this agent. Recorded in every gate.output.classification event via bundle_hash. Required at bounded and high-privilege tiers per Check20; presence enforcement is at the conformance layer, not the schema."
+    },
+
+    "auto_enrolment_eligible": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when this agent's manifest declares eligibility for the C17 automated enrolment fast-path. Default false (matching the precedent set by audit_ledger_event.algorithm and behavioural_baseline.algorithm). Consumers treat absence as false. The C17 policy verifies fast-path eligibility on each evaluation regardless of this flag; the flag declares the operator's intent for this ABOM version, not the runtime decision."
     },
 
     "created_at":     { "type": "string", "format": "date-time" },

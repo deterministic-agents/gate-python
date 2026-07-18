@@ -1,0 +1,92 @@
+[build-system]
+requires = ["hatchling>=1.18"]
+build-backend = "hatchling.build"
+
+[project]
+name = "gate-python"
+version = "1.2.0"
+description = "Reference Python library for GATE v1.4 control-plane contracts (Governed Agent Trust Environment)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [
+  { name = "Andrew Stevens", email = "andrew@deterministicagents.ai" },
+]
+keywords = [
+  "gate",
+  "deterministic-agents",
+  "ai-governance",
+  "policy",
+  "audit",
+  "tool-gateway",
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Information Technology",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Security",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+dependencies = [
+  "cryptography>=42.0.0",
+  "jsonschema>=4.21.0",
+  "pyyaml>=6.0.1",
+  "requests>=2.31.0",
+]
+
+[project.optional-dependencies]
+assurance = [
+  "scipy>=1.11.0",
+]
+dev = [
+  "pytest>=8.0.0",
+  "pytest-cov>=4.1.0",
+  "scipy>=1.11.0",
+]
+
+[project.urls]
+Documentation = "https://deterministicagents.ai/"
+Homepage = "https://deterministicagents.ai/"
+
+# v1.4 deliberately defers PyPI publication to v1.5. Operators install
+# from a tagged git ref:
+#
+#   pip install git+https://github.com/deterministic-agents/gate-python.git@v1.2.0
+#
+# No [project.urls] entry points at PyPI by design.
+
+[tool.hatch.build]
+include = [
+  "gate/**/*.py",
+  "gate/schemas/*.json",
+  "gate/schemas/*.yaml",
+  "gate/test_vectors/*.json",
+  "LICENSE",
+  "README.md",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["gate"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "gate/**/*.py",
+  "gate/schemas/*.json",
+  "gate/schemas/*.yaml",
+  "gate/test_vectors/*.json",
+  "tests/**/*.py",
+  "tests/fixtures/**/*.json",
+  "LICENSE",
+  "README.md",
+  "pyproject.toml",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v"

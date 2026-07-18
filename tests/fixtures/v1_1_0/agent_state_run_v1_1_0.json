@@ -1,0 +1,14 @@
+{
+  "schema_version": "v1",
+  "agent_instance_id": "spiffe://acme/agent/support-bot#run-1",
+  "agent_name": "support-bot",
+  "agent_version": "2.1.0",
+  "tenant_id": "acme",
+  "environment": "prod",
+  "state": "Run",
+  "owner_identity": "team-platform",
+  "abom_hash": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "current_baseline_hash": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "updated_at": "2026-05-01T00:00:00Z",
+  "commissioned_at": "2026-04-15T00:00:00Z"
+}

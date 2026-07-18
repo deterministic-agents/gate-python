@@ -1,15 +1,21 @@
-# gate-python embedded schema bundle - v1.1.0
+# gate-python embedded schema bundle - v1.2.0
 #
 # Schemas bundled with gate-python so the validation module can run
-# without depending on the gate-contracts repo at runtime. Hashes below
-# are pinned at release time; if the bundled schemas drift from
-# gate-contracts the validator will silently disagree with peers.
+# without depending on the gate-contracts repo at runtime. Hashes
+# below are pinned at release time; if the bundled schemas drift
+# from gate-contracts the validator will silently disagree with
+# peers.
+#
+# Hash function: gate.hashing.gate_hash over the canonical JSON of
+# each schema, matching gate/test_vectors/canonical_json_vectors.json.
 
-gate_contracts_version: "1.1.0"
-gate_contracts_source: "https://github.com/deterministic-agents/gate-contracts/releases/tag/v1.1.0"
+gate_contracts_version: "1.2.0"
+gate_contracts_source: "https://github.com/deterministic-agents/gate-contracts/releases/tag/v1.2.0"
 
-# v1.0.0 schemas (carried forward unchanged from gate-python v1.0.0).
-# Re-pin from gate-contracts v1.1.0 at release time.
+# Signing identity and signature fields populated at release time.
+signing_key_id: "PENDING_AT_RELEASE"
+signature: "PENDING_AT_RELEASE"
+
 schemas:
   - filename: tool_envelope.schema.json
     sha256:   PENDING_AT_RELEASE
@@ -23,49 +29,63 @@ schemas:
     sha256:   PENDING_AT_RELEASE
   - filename: multi_agent_envelope.schema.json
     sha256:   PENDING_AT_RELEASE
-
-  # v1.3 / v1.1.0 additions
   - filename: agent_discovered.schema.json
-    sha256:   sha256:925e42014ebd4f7ee91a8e5d51c00497d85e039f2cb4b2dd78349f38b00cb25b
+    sha256:   sha256:142b39c2d0f75c576d015208edd99776c3a58619ca0d55987bff809124732a7f
     introduced_in: "1.1.0"
     used_by_control: C17
   - filename: agent_remediation_outcome.schema.json
-    sha256:   sha256:a5c2c004929e798a077f50a20b879dc42477c88cdbe7d86d7114a21582af0e09
+    sha256:   sha256:462ce34b18bc8ec2dfd0ea8a7103297070737f9d44e7feb79d71bcccb8024771
     introduced_in: "1.1.0"
     used_by_control: C17
-  - filename: quality_decision.schema.json
-    sha256:   sha256:7acd7a0da8b15657b32233446c7c6893a70d9c171761097cfeded1835cd5e6ba
-    introduced_in: "1.1.0"
-    used_by_control: C18
   - filename: behavioural_baseline.schema.json
-    sha256:   sha256:2b3cb5567bc049869d91630292e595b92f0fcae9fe974eb6ed438e06aea80489
+    sha256:   sha256:8fc1d3dcfa7315d28ce6a9e5fe0887fb73a80d2fbca3b17708c3e2746a153552
     introduced_in: "1.1.0"
     used_by_control: C19
   - filename: drift_decision.schema.json
-    sha256:   sha256:29203d98b3e7bd3b0b46fc308d8dc8f62c37efc742272b1a2d814b77b6aa3b86
+    sha256:   sha256:1c9be3edb19e7ae6032b20eb7049a5931348fe9830dc5e004694b9d1358c1515
     introduced_in: "1.1.0"
     used_by_control: C19
   - filename: response_action.schema.json
-    sha256:   sha256:abbc1d11b5bca1cacd6a76dd0d9c8e8b6a44b44e6eda881f33c36de21f01b1d8
+    sha256:   sha256:865cedd8115c2d7670601442ca66173802dbdbdfca551dae9ddb92151174eb46
     introduced_in: "1.1.0"
     used_by_control: C19
-  - filename: agent_state.schema.json
-    sha256:   sha256:214f25ee4a57cfd8c5e917b605b6d0f05e4604b875a5fc30b9af9dd67245e98c
-    introduced_in: "1.1.0"
-    used_by_control: C04
   - filename: memory_item.schema.json
-    sha256:   sha256:ff1080e15efe68ca4bd8880a3c5e1097f70a15c6aedf43efc6cddee07f59a04b
+    sha256:   sha256:fe97da458b51e92951aeee442b83fd64a9d2033523acad404c54ed75f5f100b0
     introduced_in: "1.1.0"
     used_by_control: C18
   - filename: memory_request.schema.json
-    sha256:   sha256:730829b8a526c68cdade0da39bcf2ddd3d6b8564e20634129c69afa969348fe1
+    sha256:   sha256:bf97eddb91950f51bca14440056c5d52d988aa2c62d7bcdf84b354a68e9a2c48
     introduced_in: "1.1.0"
     used_by_control: C18
   - filename: memory_response.schema.json
-    sha256:   sha256:06fcad3d076f8a1f5dec7924477e7159f3ed9cec4e7ba0713c598a560716682c
+    sha256:   sha256:5256eb7424357d43244c20bd76746a3e8a22c49dff25de9585c2a712558ba688
     introduced_in: "1.1.0"
     used_by_control: C18
-  - filename: abom.schema.json
-    sha256:   sha256:3573e8bffcfd790fd707b004984155a9b2cf88c3d7ca948fa105d0f15b6ad513
+  - filename: agent_state.schema.json
+    sha256:   sha256:f0fce7dee2c835105d8c40ffa2db2845d874d18ea373106483461664b89c78da
     introduced_in: "1.1.0"
     used_by_control: C04
+  - filename: abom.schema.json
+    sha256:   sha256:8893012b58a4afd5cde746dd91f185507f0eecc5116aeffb080bbd1accf56fb4
+    introduced_in: "1.1.0"
+    used_by_control: C04
+  - filename: quality_decision.schema.json
+    sha256:   sha256:26f523bd446e6cd5abf910d0aae1e6d7a042c41ad5e5a7ae47c9b5ce022a0b24
+    introduced_in: "1.1.0"
+    used_by_control: C18
+  - filename: break_glass_record.schema.json
+    sha256:   sha256:1ec51ca9b275b45ad79490ba7acd77c7faf5b5ab2cb6f6fe9889aad504ff6b87
+    introduced_in: "1.2.0"
+    used_by_control: C09
+  - filename: auto_enrolment_policy.schema.json
+    sha256:   sha256:459cf200b0946cefe3da880a00e19dcce7459bf60df425d832f2e60ce5285f40
+    introduced_in: "1.2.0"
+    used_by_control: C17
+  - filename: output_classification_event.schema.json
+    sha256:   sha256:be1e2b23a56a19aab1524956ddadcb5d2b890fe1cd1226910dec009bb8feab95
+    introduced_in: "1.2.0"
+    used_by_control: C20
+  - filename: approved_feed_registry.schema.json
+    sha256:   sha256:a9dde8cb04f43c3b499aa0ac2c0beebf7f9a5f5107686494137dcb64126ffc3a
+    introduced_in: "1.2.0"
+    used_by_control: C18

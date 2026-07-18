@@ -2,13 +2,15 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://deterministicagents.ai/gate/v1/contracts/quality_decision.schema.json",
   "title": "GATE Memory Quality Decision Event (C18)",
-  "description": "Emitted by the C18 Data Quality Gate (Memory Gateway) for every retrieval. Captures the per-item decision against the signed quality bundle: freshness, confidence, and provenance gates.",
-  "version": "1.1.0",
+  "description": "Emitted by the C18 Data Quality Gate (Memory Gateway) for every retrieval. Captures the per-item decision against the signed quality bundle: freshness, confidence, and provenance gates. v1.4 adds source_registry_hash and feed_registry_hash to record the C04 source registry and approved feed registry state at the moment of the chain-check decision; both are optional so v1.1.1 fixture events validate cleanly.",
+  "version": "1.2.0",
   "type": "object",
-
   "required": [
-    "schema_version", "event_type", "time",
-    "request_hash", "item_id",
+    "schema_version",
+    "event_type",
+    "time",
+    "request_hash",
+    "item_id",
     "content_class",
     "freshness_age_seconds",
     "confidence_score",
@@ -17,19 +19,38 @@
     "quality_bundle_hash",
     "outcome",
     "flags_set",
-    "trace_id", "ledger_event_id",
-    "tenant_id", "environment"
+    "trace_id",
+    "ledger_event_id",
+    "tenant_id",
+    "environment"
   ],
-
   "properties": {
-    "schema_version": { "type": "string", "const": "v1" },
-    "event_type":     { "type": "string", "const": "gate.memory.quality_decision" },
-    "time":           { "type": "string", "format": "date-time" },
-
-    "tenant_id": { "type": "string" },
-    "environment": { "type": "string", "enum": ["dev", "test", "prod"] },
-    "control_plane_version": { "type": "string" },
-
+    "schema_version": {
+      "type": "string",
+      "const": "v1"
+    },
+    "event_type": {
+      "type": "string",
+      "const": "gate.memory.quality_decision"
+    },
+    "time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tenant_id": {
+      "type": "string"
+    },
+    "environment": {
+      "type": "string",
+      "enum": [
+        "dev",
+        "test",
+        "prod"
+      ]
+    },
+    "control_plane_version": {
+      "type": "string"
+    },
     "request_hash": {
       "type": "string",
       "pattern": "^sha256:[a-f0-9]{64}$",
@@ -43,13 +64,15 @@
       "type": "string",
       "description": "Content class taxonomy key. Drives the per-class TTL, minimum confidence, and provenance-required configuration in the quality bundle."
     },
-
     "freshness_age_seconds": {
-      "type": "number", "minimum": 0,
+      "type": "number",
+      "minimum": 0,
       "description": "Item age in seconds at retrieval time."
     },
     "confidence_score": {
-      "type": "number", "minimum": 0, "maximum": 1,
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
       "description": "Confidence score recorded at write time. Semantics defined by the upstream pipeline. C18 enforces the per-class threshold; it does not compute the score."
     },
     "provenance_uri": {
@@ -60,37 +83,69 @@
       "type": "boolean",
       "description": "True when the stored provenance_hash matches the hash of the source descriptor resolved from provenance_uri."
     },
-
     "quality_bundle_hash": {
       "type": "string",
       "pattern": "^sha256:[a-f0-9]{64}$",
       "description": "Hash of the signed quality bundle in force when this decision was made. Recorded so the decision is replayable."
     },
+    "source_registry_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Hash of the active C04 source registry state when this quality decision ran the chain check. Present when the provenance_uri used the gate-source:// scheme. Absent on v1.3 records and on decisions where the chain check did not consult the source registry."
+    },
+    "feed_registry_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Hash of the active approved feed registry state when this quality decision ran the chain check. Present when the provenance_uri used the gate-feed:// scheme. Absent on v1.3 records and on decisions where the chain check did not consult the feed registry."
+    },
     "outcome": {
       "type": "string",
-      "enum": ["pass", "flag", "downgrade", "deny"],
+      "enum": [
+        "pass",
+        "flag",
+        "downgrade",
+        "deny"
+      ],
       "description": "Resolved quality-gate outcome. Severity order: deny > downgrade > flag > pass."
     },
     "flags_set": {
       "type": "array",
       "items": {
         "type": "string",
-        "enum": ["stale", "low_confidence", "provenance_missing", "provenance_unverified"]
+        "enum": [
+          "stale",
+          "low_confidence",
+          "provenance_missing",
+          "provenance_unverified",
+          "provenance_unregistered",
+          "feed_registry_invariant_violation"
+        ]
       },
       "uniqueItems": true,
-      "description": "Quality flags returned alongside the item. Downstream consumers (agent runtime, prompt template, C13 trace) MUST honour these."
+      "description": "Quality flags returned alongside the item. Downstream consumers (agent runtime, prompt template, C13 trace) MUST honour these. v1.4 adds two flags: `provenance_unregistered` for the C18 chain-check case where a well-formed provenance_uri did not resolve against either the C04 source registry or the approved feed registry; `feed_registry_invariant_violation` for the case where the approved feed registry itself violated a structural invariant at query time (hash mismatch, expired entry, missing referenced feed)."
     },
-
-    "trace_id":        { "type": "string" },
-    "ledger_event_id": { "type": "string", "format": "uuid" },
-
+    "trace_id": {
+      "type": "string"
+    },
+    "ledger_event_id": {
+      "type": "string",
+      "format": "uuid"
+    },
     "quality_override": {
       "type": "object",
       "description": "Present only when a break-glass override admitted an otherwise-denied retrieval. See memory_request.quality_override.",
       "properties": {
-        "override_id":   { "type": "string", "format": "uuid" },
-        "approver_id":   { "type": "string" },
-        "expires_at":    { "type": "string", "format": "date-time" }
+        "override_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "approver_id": {
+          "type": "string"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        }
       }
     }
   }

@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deterministicagents.ai/gate/v1/contracts/auto_enrolment_policy.schema.json",
+  "title": "GATE Auto-Enrolment Policy (C17 fast-path)",
+  "description": "Configuration document for the C17 automated enrolment fast-path. A candidate qualifies for the fast-path only if its workload_class is present in approved_workload_classes, its classification_confidence meets the effective threshold (per-class override if defined, else default_confidence_threshold), and (when require_asset_tags is true) its asset tags resolve to a known owner. The policy artifact itself is governed by dual approval at the operational layer; the policy hash is recorded in every fast-path agent_discovered event via auto_enrolment_policy_hash. The high-privilege threshold offset is operator policy in v1.4 (no schema field); operators set per-class thresholds explicitly above the default for any class enabled at high-privilege tier. Configuration artifact (not a signed evidence record), so additionalProperties is left unset to allow forward-compatible extension.",
+  "version": "1.0.0",
+  "type": "object",
+
+  "required": [
+    "schema_version",
+    "default_confidence_threshold",
+    "approved_workload_classes",
+    "require_asset_tags"
+  ],
+
+  "properties": {
+    "schema_version": { "type": "string", "const": "v1" },
+
+    "default_confidence_threshold": {
+      "type": "number",
+      "minimum": 0.80,
+      "maximum": 1.0,
+      "description": "Default confidence threshold applied when a candidate's workload_class is not present in workload_class_thresholds. Floor of 0.80 is enforced at schema level; this is the no-regret floor below which fast-path enrolments are operationally unsafe."
+    },
+
+    "approved_workload_classes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Allowlist of workload classes eligible for the fast-path. A candidate whose workload_class is not in this list is routed to manual Commission regardless of confidence or asset tags."
+    },
+
+    "require_asset_tags": {
+      "type": "boolean",
+      "description": "When true, the fast-path additionally requires that the candidate's asset tags resolve to a known owner in the asset registry. Recommended true at bounded and high-privilege tiers. False is permitted at sandbox tier."
+    },
+
+    "workload_class_thresholds": {
+      "type": "object",
+      "description": "Optional per-workload-class threshold override map. Keys are workload class strings; values are confidence thresholds (0.80-1.0). For a candidate with workload_class W, the effective threshold is workload_class_thresholds[W] if defined, else default_confidence_threshold. Floor of 0.80 enforced on every value. Keys SHOULD be members of approved_workload_classes; entries for unapproved classes are ignored at runtime. The C17 policy reports an unapproved-class threshold as a configuration warning so the misconfiguration surfaces in conformance rather than running silently. Change-rationale and policy version history live at the policy bundle change-control layer (the same surface that signs the auto_enrolment_policy), not as fields on this schema, so the policy artifact stays a single decision document.",
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0.80,
+        "maximum": 1.0
+      }
+    }
+  }
+}

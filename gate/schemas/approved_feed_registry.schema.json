@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deterministicagents.ai/gate/v1/contracts/approved_feed_registry.schema.json",
+  "title": "GATE Approved Feed Registry (C18)",
+  "description": "Signed registry of approved external feeds for the C18 provenance chain check. A provenance_uri using the gate-feed:// scheme resolves its <feed_id> against the active registry; entries authorise the feed to write into the named content classes. The registry is a signed authorisation artifact; the policy at policies/memory/c18_quality.rego verifies registry_hash against the registry hash recorded in each quality_decision before honouring a chain-check pass. The content_classes_authorised values MUST match the operator's content_class vocabulary maintained alongside the C18 quality bundle; the schema does not enforce the cross-reference because the vocabulary is operator-owned, but a quarterly registry review verifies it. This schema sets additionalProperties to false (deviating from the v1.3 repo-wide permissive default) because the registry is a security-critical signed artifact where any undeclared field could be used to smuggle unverified authorisation past audit. The signing model and length-match constraint between signing_key_ids and signatures match break_glass_record exactly; the verification policy enforces the array length match.",
+  "version": "1.0.0",
+  "type": "object",
+
+  "required": [
+    "schema_version",
+    "registry_version",
+    "registry_hash",
+    "last_updated_at",
+    "entries",
+    "signing_key_ids",
+    "signatures",
+    "gate_version"
+  ],
+
+  "properties": {
+    "schema_version": { "type": "string", "const": "v1" },
+
+    "registry_version": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Semver string identifying the registry version. Bumped on every entry add, modify, or remove."
+    },
+
+    "registry_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Stable hash over the canonical-JSON serialisation of the registry body excluding the signatures field. Recorded in every quality_decision event via feed_registry_hash so the chain-check decision is replayable."
+    },
+
+    "last_updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Wall-clock time of the most recent registry edit."
+    },
+
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "feed_id",
+          "feed_name",
+          "verification_mechanism",
+          "verification_payload",
+          "last_validated_at",
+          "content_classes_authorised"
+        ],
+        "properties": {
+          "feed_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Stable identifier for the feed. Used as the <feed_id> path component in gate-feed:// provenance URIs."
+          },
+          "feed_name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Human-readable name of the feed for the operator registry UI and audit reports."
+          },
+          "verification_mechanism": {
+            "type": "string",
+            "enum": ["public_key", "published_manifest", "signed_endpoint"],
+            "description": "Mechanism the policy uses to verify the feed's content. public_key: signature verification against the key in verification_payload. published_manifest: hash match against the manifest at the URL in verification_payload. signed_endpoint: signature on the resolved content from the endpoint in verification_payload."
+          },
+          "verification_payload": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Polymorphic string whose format depends on verification_mechanism. For public_key: PEM-encoded public key or key fingerprint. For published_manifest: URL of the manifest plus the manifest hash. For signed_endpoint: HTTPS endpoint URL plus the public key for endpoint signature verification. The per-mechanism format is documented separately in the C18 implementation guide; the schema treats this as an opaque string for v1.4."
+          },
+          "last_validated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Wall-clock time of the most recent manual or automated validation of this entry. Entries older than a configured staleness threshold are flagged for review."
+          },
+          "content_classes_authorised": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "type": "string", "minLength": 1 },
+            "description": "Content classes the feed is authorised to write into. Values MUST match the operator's content_class vocabulary maintained alongside the C18 quality bundle. Cross-reference is enforced operationally, not at schema level."
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "Approved feed entries. Order is not significant for verification; the registry is queried by feed_id. feed_id MUST be unique across entries; uniqueness is enforced in the verification policy, not at schema level (JSON Schema uniqueItems compares whole objects and would not catch two entries sharing a feed_id but differing in other fields). The registry is single-instance per operator in v1.4: there is no registry_id field and the C18 policy assumes one active approved_feed_registry per tenant deployment. Multi-registry support is a candidate for v1.5 and would land as an optional registry_id field with a documented v1.4-compatibility default."
+    },
+
+    "signing_key_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 },
+      "description": "Identifiers of the signing keys used to produce signatures. One entry per signature in the signatures array, in the same order. Length match enforced in the verification policy."
+    },
+
+    "signatures": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 },
+      "description": "Cryptographic signatures over the canonical-JSON registry body excluding the signatures field itself. The verification policy MUST validate all signatures against the keys listed in signing_key_ids before honouring registry contents. The number of signatures and signing_key_ids must match; this length match is enforced in the verification policy, not at schema level."
+    },
+
+    "gate_version": {
+      "type": "string",
+      "description": "GATE framework version under which this registry version was issued (e.g. \"1.4\")."
+    }
+  },
+
+  "additionalProperties": false
+}

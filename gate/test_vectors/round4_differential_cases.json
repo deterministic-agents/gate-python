@@ -1,0 +1,316 @@
+{
+  "version": "1.0",
+  "description": "Differential fixture for round4 (four decimal places, ties away from zero, negative zero normalised to +0.0). Byte-identical copies are committed in gate-python (gate/test_vectors/) and gate-rust (src/test_vectors/); both test suites iterate every case and CI asserts the shared SHA-256. Following the negative_vectors precedent in canonical_json_vectors.json, input and expected are decimal strings so both languages parse identical text with correctly rounded parsers (serde_json's default JSON float parsing is not guaranteed shortest-round-trip exact). Expected values of zero are always +0.0; implementations must match the exact bit pattern.",
+  "cases": [
+    {
+      "id": "tie_n-6_times_0.00005",
+      "input": "-0.00030000000000000003",
+      "expected": "-0.0003"
+    },
+    {
+      "id": "tie_n-5_times_0.00005",
+      "input": "-0.00025",
+      "expected": "-0.0003"
+    },
+    {
+      "id": "tie_n-4_times_0.00005",
+      "input": "-0.0002",
+      "expected": "-0.0002"
+    },
+    {
+      "id": "tie_n-3_times_0.00005",
+      "input": "-0.00015000000000000001",
+      "expected": "-0.0002"
+    },
+    {
+      "id": "tie_n-2_times_0.00005",
+      "input": "-0.0001",
+      "expected": "-0.0001"
+    },
+    {
+      "id": "tie_n-1_times_0.00005",
+      "input": "-5e-05",
+      "expected": "-0.0001"
+    },
+    {
+      "id": "tie_n+0_times_0.00005",
+      "input": "0.0",
+      "expected": "0.0"
+    },
+    {
+      "id": "tie_n+1_times_0.00005",
+      "input": "5e-05",
+      "expected": "0.0001"
+    },
+    {
+      "id": "tie_n+2_times_0.00005",
+      "input": "0.0001",
+      "expected": "0.0001"
+    },
+    {
+      "id": "tie_n+3_times_0.00005",
+      "input": "0.00015000000000000001",
+      "expected": "0.0002"
+    },
+    {
+      "id": "tie_n+4_times_0.00005",
+      "input": "0.0002",
+      "expected": "0.0002"
+    },
+    {
+      "id": "tie_n+5_times_0.00005",
+      "input": "0.00025",
+      "expected": "0.0003"
+    },
+    {
+      "id": "tie_n+6_times_0.00005",
+      "input": "0.00030000000000000003",
+      "expected": "0.0003"
+    },
+    {
+      "id": "neg_underflow_-1e-05",
+      "input": "-1e-05",
+      "expected": "0.0"
+    },
+    {
+      "id": "neg_underflow_-2e-05",
+      "input": "-2e-05",
+      "expected": "0.0"
+    },
+    {
+      "id": "neg_underflow_-3e-05",
+      "input": "-3e-05",
+      "expected": "0.0"
+    },
+    {
+      "id": "neg_underflow_-4e-05",
+      "input": "-4e-05",
+      "expected": "0.0"
+    },
+    {
+      "id": "neg_underflow_-4.5e-05",
+      "input": "-4.5e-05",
+      "expected": "0.0"
+    },
+    {
+      "id": "neg_underflow_-4.99e-05",
+      "input": "-4.99e-05",
+      "expected": "0.0"
+    },
+    {
+      "id": "neg_underflow_-1e-07",
+      "input": "-1e-07",
+      "expected": "0.0"
+    },
+    {
+      "id": "neg_underflow_-5.96e-08",
+      "input": "-5.96e-08",
+      "expected": "0.0"
+    },
+    {
+      "id": "neg_underflow_-1e-09",
+      "input": "-1e-09",
+      "expected": "0.0"
+    },
+    {
+      "id": "neg_underflow_-2.5e-05",
+      "input": "-2.5e-05",
+      "expected": "0.0"
+    },
+    {
+      "id": "negative_zero",
+      "input": "-0.0",
+      "expected": "0.0"
+    },
+    {
+      "id": "rep_0.12345",
+      "input": "0.12345",
+      "expected": "0.1235"
+    },
+    {
+      "id": "rep_-0.12345",
+      "input": "-0.12345",
+      "expected": "-0.1235"
+    },
+    {
+      "id": "rep_0.123449999",
+      "input": "0.123449999",
+      "expected": "0.1234"
+    },
+    {
+      "id": "rep_-0.123449999",
+      "input": "-0.123449999",
+      "expected": "-0.1234"
+    },
+    {
+      "id": "rep_0.99995",
+      "input": "0.99995",
+      "expected": "1.0"
+    },
+    {
+      "id": "rep_-0.99995",
+      "input": "-0.99995",
+      "expected": "-1.0"
+    },
+    {
+      "id": "rep_0.5",
+      "input": "0.5",
+      "expected": "0.5"
+    },
+    {
+      "id": "rep_-0.5",
+      "input": "-0.5",
+      "expected": "-0.5"
+    },
+    {
+      "id": "rep_0.876543",
+      "input": "0.876543",
+      "expected": "0.8765"
+    },
+    {
+      "id": "rep_-0.876543",
+      "input": "-0.876543",
+      "expected": "-0.8765"
+    },
+    {
+      "id": "rep_1.0",
+      "input": "1.0",
+      "expected": "1.0"
+    },
+    {
+      "id": "rep_-1.0",
+      "input": "-1.0",
+      "expected": "-1.0"
+    },
+    {
+      "id": "rep_0.50005",
+      "input": "0.50005",
+      "expected": "0.5001"
+    },
+    {
+      "id": "rep_-0.50005",
+      "input": "-0.50005",
+      "expected": "-0.5001"
+    },
+    {
+      "id": "rep_3.14159",
+      "input": "3.14159",
+      "expected": "3.1416"
+    },
+    {
+      "id": "rep_-3.14159",
+      "input": "-3.14159",
+      "expected": "-3.1416"
+    },
+    {
+      "id": "rep_2.71828",
+      "input": "2.71828",
+      "expected": "2.7183"
+    },
+    {
+      "id": "rep_-2.71828",
+      "input": "-2.71828",
+      "expected": "-2.7183"
+    },
+    {
+      "id": "rep_12.34565",
+      "input": "12.34565",
+      "expected": "12.3456"
+    },
+    {
+      "id": "rep_-12.34565",
+      "input": "-12.34565",
+      "expected": "-12.3456"
+    },
+    {
+      "id": "rep_0.1234",
+      "input": "0.1234",
+      "expected": "0.1234"
+    },
+    {
+      "id": "rep_-0.1234",
+      "input": "-0.1234",
+      "expected": "-0.1234"
+    },
+    {
+      "id": "rep_99.99995",
+      "input": "99.99995",
+      "expected": "100.0"
+    },
+    {
+      "id": "rep_-99.99995",
+      "input": "-99.99995",
+      "expected": "-100.0"
+    },
+    {
+      "id": "rep_0.66665",
+      "input": "0.66665",
+      "expected": "0.6667"
+    },
+    {
+      "id": "rep_-0.66665",
+      "input": "-0.66665",
+      "expected": "-0.6667"
+    },
+    {
+      "id": "rep_0.33335",
+      "input": "0.33335",
+      "expected": "0.3334"
+    },
+    {
+      "id": "rep_-0.33335",
+      "input": "-0.33335",
+      "expected": "-0.3334"
+    },
+    {
+      "id": "rep_7.00005",
+      "input": "7.00005",
+      "expected": "7.0001"
+    },
+    {
+      "id": "rep_-7.00005",
+      "input": "-7.00005",
+      "expected": "-7.0001"
+    },
+    {
+      "id": "half_tie_0.00015",
+      "input": "0.00015",
+      "expected": "0.0001"
+    },
+    {
+      "id": "half_tie_-0.00015",
+      "input": "-0.00015",
+      "expected": "-0.0001"
+    },
+    {
+      "id": "half_tie_0.00035",
+      "input": "0.00035",
+      "expected": "0.0004"
+    },
+    {
+      "id": "half_tie_-0.00035",
+      "input": "-0.00035",
+      "expected": "-0.0004"
+    },
+    {
+      "id": "half_tie_0.00045",
+      "input": "0.00045",
+      "expected": "0.0005"
+    },
+    {
+      "id": "half_tie_-0.00045",
+      "input": "-0.00045",
+      "expected": "-0.0005"
+    },
+    {
+      "id": "half_tie_2.50005",
+      "input": "2.50005",
+      "expected": "2.5001"
+    },
+    {
+      "id": "half_tie_-2.50005",
+      "input": "-2.50005",
+      "expected": "-2.5001"
+    }
+  ]
+}

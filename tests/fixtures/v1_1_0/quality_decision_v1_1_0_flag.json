@@ -1,0 +1,19 @@
+{
+  "schema_version": "v1",
+  "event_type": "gate.memory.quality_decision",
+  "time": "2026-05-02T00:00:00Z",
+  "request_hash": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+  "item_id": "doc-002",
+  "content_class": "product_pricing",
+  "freshness_age_seconds": 1000000,
+  "confidence_score": 0.85,
+  "provenance_uri": "https://example.com/source-2",
+  "provenance_hash_verified": true,
+  "quality_bundle_hash": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+  "outcome": "flag",
+  "flags_set": ["stale"],
+  "trace_id": "otel-trace-2",
+  "ledger_event_id": "22222222-2222-2222-2222-222222222222",
+  "tenant_id": "acme",
+  "environment": "prod"
+}

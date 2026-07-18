@@ -1,0 +1,18 @@
+{
+  "schema_version": "v1",
+  "event_type": "gate.discovery.agent_discovered",
+  "time": "2026-05-01T00:00:00Z",
+  "tenant_id": "acme",
+  "environment": "prod",
+  "candidate": {
+    "workload_identity": "spiffe://acme/agent/unknown",
+    "detection_boundary": "network",
+    "classification_confidence": 0.85,
+    "evidence_payload": {
+      "detector_id": "net_v1",
+      "detector_version": "1.0"
+    },
+    "candidate_hash": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "classifier_bundle_hash": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deterministicagents.ai/gate/v1/contracts/output_classification_event.schema.json",
+  "title": "GATE Output Classification Event (C20)",
+  "description": "Emitted by the C20 Output Classification engine for every final agent response immediately before delivery. Records the sensitivity tier, regulated categories, confidence score, and obligation list resolved against the signed output classification bundle. The presence of an event per final response is the C20 coverage invariant; no delivery path bypasses classification. Follows the v1.3 event-schema convention (no additionalProperties: false) for forward-compatible extension as the classification surface evolves.",
+  "version": "1.0.0",
+  "type": "object",
+
+  "required": [
+    "schema_version", "event_type", "time",
+    "run_id", "trace_id",
+    "tenant_id", "environment",
+    "output_hash",
+    "classification",
+    "obligations",
+    "bundle_hash",
+    "ledger_event_id"
+  ],
+
+  "properties": {
+    "schema_version": { "type": "string", "const": "v1" },
+    "event_type":     { "type": "string", "const": "gate.output.classification" },
+    "time":           { "type": "string", "format": "date-time" },
+
+    "run_id":   { "type": "string", "format": "uuid" },
+    "trace_id": { "type": "string" },
+    "tenant_id": { "type": "string" },
+    "environment": { "type": "string", "enum": ["dev", "test", "prod"] },
+    "control_plane_version": { "type": "string" },
+
+    "output_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Hash over the canonical-JSON serialisation of the final response delivered to the user (or the response held pending obligation resolution). Bound to the response that was classified; the obligation resolution and the delivered output can be reconstructed by hash."
+    },
+
+    "classification": {
+      "type": "object",
+      "required": ["sensitivity_tier", "regulated_categories", "confidence_score", "requires_human_review"],
+      "properties": {
+        "sensitivity_tier": {
+          "type": "string",
+          "description": "Resolved sensitivity tier value, drawn from the output classification bundle's enumeration. Schema does not enumerate the values because the tier vocabulary is operator-owned and configured in the bundle."
+        },
+        "regulated_categories": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true,
+          "description": "Regulated category values the response matched. Empty array when the response is not in any regulated category. Values drawn from the bundle's regulated category enumeration."
+        },
+        "confidence_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Calibrated confidence on the response as a whole. Per-claim scoring is out of scope for C20 v1.4 and is a candidate for v1.5."
+        },
+        "requires_human_review": {
+          "type": "boolean",
+          "description": "Derived from the action matrix. True when the action matrix's effective entry for this combination requires a hitl_review obligation."
+        }
+      }
+    },
+
+    "obligations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["redact_fields", "hitl_review", "hold_for_review"]
+      },
+      "uniqueItems": true,
+      "description": "Obligations the response is subject to before delivery. Empty array means pass (deliver without modification). Obligations compose: a response can carry both redact_fields and hitl_review. Delivery does not proceed until all obligations are resolved."
+    },
+
+    "bundle_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Hash of the signed output classification bundle in force when this classification was emitted. The auditor verifies the classification by bundle hash, not by bundle version label, so versioning drift between runtime and ledger cannot mislead the audit."
+    },
+
+    "ledger_event_id": { "type": "string", "format": "uuid" }
+  }
+}

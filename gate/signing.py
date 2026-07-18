@@ -228,7 +228,7 @@ def verify_signature(
 
     Notes
     -----
-    This function never raises on an invalid signature — it returns
+    This function never raises on an invalid signature - it returns
     False. It only raises on programming errors (wrong key type, etc.).
 
     Examples

@@ -277,7 +277,7 @@ class ReplayRecorder:
         """
         Record an invariant halt step (C09).
 
-        These steps are critical for forensic replay — they explain why
+        These steps are critical for forensic replay - they explain why
         a tool call that policy permitted was still blocked.
         """
         step = self._new_step("invariant_halt")
