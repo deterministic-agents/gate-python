@@ -2,7 +2,7 @@
 
 ## v1.2.0
 
-Released: 2026-07-18
+Released: 2026-08-18
 Previous version: v1.1.0
 GATE framework version: v1.4
 gate-contracts version: v1.2.0
